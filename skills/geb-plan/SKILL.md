@@ -61,4 +61,8 @@ After presenting the plan, ask: "Ready to start, or adjust anything?"
 
 ## Persistence
 
-If this is a multi-session project with `.geb/index.md`, save the plan there (or as `.geb/plan.md` if it's substantial). Plans that only live in the conversation are lost on context reset.
+If this is a multi-session project with `.geb/index.md`:
+- Save the plan to shared state: in `index.md` Notes, or as `.geb/plan.md` if substantial. This is team knowledge — others benefit from seeing the plan.
+- Save your current position to `.geb/.local/status.md` (e.g., "Executing step 3 of 5, steps 1-2 done"). This is personal session state — only you need it.
+
+Plans that only live in the conversation are lost on context reset.

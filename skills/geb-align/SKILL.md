@@ -41,4 +41,6 @@ Based on findings:
 
 ## Update State
 
-If `.geb/index.md` exists, update the Status section to reflect current progress.
+If `.geb/index.md` exists:
+- Update the **Progress** section in `index.md` with milestone facts (shared — e.g., "Auth module complete, API tests passing").
+- Update `.geb/.local/status.md` with your session state (personal — e.g., "Finished alignment check, next: deploy").

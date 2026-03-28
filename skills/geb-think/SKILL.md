@@ -56,4 +56,4 @@ End with one of:
 
 - If the direction leads to a multi-step implementation, suggest `/geb-plan` to decompose into steps.
 - If the task is small enough to execute directly from here, just do it.
-- If `.geb/index.md` exists, update it with the decision or direction reached.
+- If `.geb/index.md` exists, update its Notes section with the decision or direction reached (shared knowledge). Don't touch `.geb/.local/` — thinking results are project knowledge, not personal state.

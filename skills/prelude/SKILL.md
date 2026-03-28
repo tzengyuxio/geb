@@ -86,8 +86,36 @@ These thoughts signal the step is *more* important, not less.
 
 For projects spanning multiple sessions, use `.geb/` for organic project memory. **Do NOT create preemptively** — only when knowledge worth preserving accumulates.
 
-Start with a single `.geb/index.md` containing: Goal (one sentence), Status (what's done/next), Notes (decisions, open questions).
+### Two layers: shared + personal
 
-**Growth**: sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
-**Session continuity**: silently read `.geb/index.md` at session start. Connect naturally if relevant; don't bring up old projects unprompted.
-**Aging**: suggest archiving stale items to `.geb/archive/`. Never delete.
+`.geb/` contains two layers with different scopes:
+
+**Shared** (committed to git) — team knowledge:
+- `.geb/index.md` — Goal (one sentence), Progress (milestone facts), Notes (decisions, open questions)
+- Budded files: `research.md`, `decisions.md`, `plan.md`, etc.
+- `archive/` for stale items
+
+**Personal** (gitignored via `.geb/.local/`) — individual session state:
+- `.geb/.local/status.md` — what *I* am currently working on, where *I* left off
+
+The distinction: "Auth module shipped to staging" is **Progress** (shared fact). "I'm halfway through the auth PR, still need tests" is **Status** (personal session state).
+
+### Growth
+
+Sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
+
+### Session continuity
+
+At session start, silently read in order:
+1. `.geb/.local/status.md` (personal — where I left off)
+2. `.geb/index.md` (shared — project context)
+
+Connect naturally if relevant; don't bring up old projects unprompted.
+
+### Aging
+
+Suggest archiving stale items to `.geb/archive/`. Never delete.
+
+### Multi-user note
+
+When multiple team members use GEB on the same repo, shared `.geb/` files may be edited concurrently. Merge conflicts on Markdown are typically straightforward — resolve like any other source file. No special tooling required.

@@ -8,3 +8,6 @@ Desktop.ini
 
 # Test results (generated output)
 tests/results/
+
+# GEB personal session state (per-user, not shared)
+.geb/.local/

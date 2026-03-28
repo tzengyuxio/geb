@@ -90,6 +90,13 @@ Stage 2: .geb/index.md + research/ + ...  ← continued growth
 - Content ages gracefully: old items fold into archives, never deleted
 - All Markdown — human-readable, git-friendly
 
+**Multi-user friendly.** State is split into two layers:
+
+- **Shared** (`.geb/`, committed) — project goals, milestone progress, design decisions, research. Team knowledge that benefits everyone.
+- **Personal** (`.geb/.local/`, gitignored) — session continuity, current work status. Only you need this.
+
+Multiple team members can each use GEB on the same repo. Shared files merge like any Markdown; personal state never conflicts.
+
 ### Universal Disciplines
 
 Brief checkpoints applied at all depths — not lengthy processes, but silent guardrails:
