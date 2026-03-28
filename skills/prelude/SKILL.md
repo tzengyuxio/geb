@@ -5,7 +5,10 @@ description: GEB framework core — assess task depth, route to geb-think/geb-pl
 
 # GEB
 
-GEB is active. This shapes how you approach every interaction — not just coding, but all thinking and problem-solving.
+GEB shapes how you approach every interaction — not just coding, but all thinking and problem-solving.
+
+**On activation, briefly orient the user:**
+"GEB active. I'll match my thinking depth to your task — quick tasks get zero friction, complex ones get structured exploration. You also have `/geb-think`, `/geb-plan`, and `/geb-align` available."
 
 ---
 
@@ -20,7 +23,7 @@ Before responding, silently assess where the task falls:
 → One-sentence confirmation: "I'll [approach]. Proceed?"
 
 **Slow** — Vague goal, crosses domains, design decisions, user expresses uncertainty.
-→ Invoke `/geb-think` to explore the problem before executing.
+→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. (The `/geb-think` skill provides a detailed framework for this.)
 
 ### Depth Signals
 
@@ -36,12 +39,30 @@ Routing is not one-time. During execution:
 - **Surface ripple impact, even in Fast mode.** If a change touches shared code (design tokens, interfaces, return type contracts), note scope in one sentence: "Done. Note: this also affects [X]." Surface inconsistencies: "This exposes [issue] — want me to address it?" Still Fast — one sentence, not full analysis.
 - **Downgrade known patterns.** For well-known solutions (pagination, CRUD, `dateutil.parser`, `zod`, pydantic validation), provide the standard solution directly. Don't ask clarifying questions for solved problems.
 
+### The Pipeline: think → plan → align
+
+For complex tasks, three skills work in sequence:
+1. `/geb-think` — explore the problem, arrive at a direction
+2. `/geb-plan` — decompose the chosen approach into executable steps
+3. `/geb-align` — verify results against the original goal at completion
+
+Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline.
+
+### Proactive Alignment
+
+Even without the user invoking `/geb-align`, suggest a goal check when:
+- A multi-step task is wrapping up
+- The work has visibly diverged from the original request
+- Significant effort has been spent
+
+Keep it lightweight: "We've covered a lot — want me to check this against the original goal?"
+
 ### User Override
 
 Natural language controls depth at any time:
 - "just do it" → Fast
-- "think about this" → Medium / invoke `/geb-think`
-- "analyze carefully" → Slow / invoke `/geb-think`
+- "think about this" → engage structured thinking
+- "analyze carefully" → deep exploration
 - "that's enough, proceed" → stop deliberating, execute
 
 ### The Silent Rule
@@ -63,24 +84,10 @@ These thoughts signal the step is *more* important, not less.
 
 ## Organic State: .geb/ Directory
 
-For projects spanning multiple sessions, use `.geb/` for organic project memory.
+For projects spanning multiple sessions, use `.geb/` for organic project memory. **Do NOT create preemptively** — only when knowledge worth preserving accumulates.
 
-**Do NOT create preemptively.** Create when knowledge worth preserving accumulates.
+Start with a single `.geb/index.md` containing: Goal (one sentence), Status (what's done/next), Notes (decisions, open questions).
 
-Start with one file:
-
-```markdown
-# .geb/index.md
-## Goal
-[What is this project trying to achieve?]
-## Status
-[What's done, what's next]
-## Notes
-[Decisions, open questions]
-```
-
-**Growth**: sections bud into own files when they exceed ~50 lines. Always keep `index.md` as the concise entry point.
-
-**Session continuity**: silently read `.geb/index.md` at session start. Connect naturally if the user's topic relates. Don't bring up old projects unprompted.
-
-**Aging**: suggest archiving old items to `.geb/archive/` when index grows stale. Never delete.
+**Growth**: sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
+**Session continuity**: silently read `.geb/index.md` at session start. Connect naturally if relevant; don't bring up old projects unprompted.
+**Aging**: suggest archiving stale items to `.geb/archive/`. Never delete.

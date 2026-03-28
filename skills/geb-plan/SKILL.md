@@ -5,25 +5,17 @@ description: Decompose a decided approach into executable steps — use after th
 
 # GEB Plan — Decomposition & Execution Design
 
-You've been invoked because the direction is clear and now needs to be broken into executable steps.
+The direction is clear. Break it into executable steps.
 
-## Input
+## Pre-check
 
-By now you should have (from `/geb-think` or the user directly):
-- A clear goal
-- A chosen approach
-- Known constraints
-
-If any of these are missing, state what's missing and either fill it in yourself or ask.
+This skill works best when the goal and approach are already decided. If either is unclear, suggest `/geb-think` first rather than planning around ambiguity.
 
 ## Decomposition Rules
 
 ### Keep steps atomic and verifiable
 
-Each step should:
-- Do one thing
-- Have a clear "done" condition
-- Be independently testable where possible
+Each step should do one thing with a clear "done" condition.
 
 Bad: "Set up the backend"
 Good: "Create the Express app with health check endpoint. Verify: `curl localhost:3000/health` returns 200."
@@ -43,8 +35,8 @@ Mark which steps depend on others. Independent steps can be parallelized.
 ### Right-size the plan
 
 - 3-7 steps for most tasks
-- If you need more than 10 steps, the task should probably be split into phases
-- Each step should take roughly similar effort — if one is 10x larger, break it down further
+- More than 10 steps → split into phases
+- Steps should be roughly similar effort — if one is 10x larger, break it down
 
 ## Output Format
 
@@ -58,11 +50,15 @@ Mark which steps depend on others. Independent steps can be parallelized.
    ↳ depends on: 1
 3. [Step] — verify: [...]
 
-## Parallel opportunities
+## Parallel opportunities  (optional — only if parallelizable steps exist)
 [Which steps can run concurrently]
 
-## Risks
-[Anything that might derail the plan — optional, only if non-obvious]
+## Risks  (optional — only if non-obvious risks exist)
+[Anything that might derail the plan]
 ```
 
 After presenting the plan, ask: "Ready to start, or adjust anything?"
+
+## Persistence
+
+If this is a multi-session project with `.geb/index.md`, save the plan there (or as `.geb/plan.md` if it's substantial). Plans that only live in the conversation are lost on context reset.

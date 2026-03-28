@@ -5,7 +5,7 @@ description: Structured thinking for complex tasks — use before executing when
 
 # GEB Think — Structured Exploration
 
-You've been invoked because this task needs thinking before doing. Your job: clarify the problem, explore the space, and arrive at a clear direction.
+This task needs thinking before doing. Clarify the problem, explore the space, and arrive at a clear direction.
 
 ## Core Principle: Investigate While Asking
 
@@ -32,9 +32,8 @@ Problem definition is continuous. Revisit as understanding grows.
 
 ### 2. Research & Exploration
 
-What already exists? Don't reinvent.
+Don't reinvent. Check if the problem is already solved by project dependencies or standard libraries before designing a custom solution.
 
-- Check project dependencies, existing patterns, prior art
 - If the research topic is too large, produce a **research method** rather than trying to cover everything
 - For well-known patterns, skip research and go straight to approach design
 
@@ -53,12 +52,8 @@ End with one of:
 - A key question that unblocks: "The main decision is [X]. Which way do you lean?"
 - A reframed problem: "After looking at this, the real issue is [Y], not [original X]."
 
-## Output
+## What's Next
 
-Produce whatever captures the current understanding best:
-- A question, if the problem needs more exploration
-- A comparison, if there are real trade-offs
-- A recommendation, if the path is clear
-- A reframing, if the original question was wrong
-
-Form follows need. Don't force structure where none is needed.
+- If the direction leads to a multi-step implementation, suggest `/geb-plan` to decompose into steps.
+- If the task is small enough to execute directly from here, just do it.
+- If `.geb/index.md` exists, update it with the decision or direction reached.
