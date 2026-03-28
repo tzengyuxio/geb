@@ -45,7 +45,8 @@ Most tasks fall in between — use judgment. When uncertain, default to **Medium
 Routing is not one-time. During execution:
 
 - If you discover unexpected complexity (more files affected, hidden dependencies, design questions emerging), suggest upgrading: "This is more involved than expected — [specifics]. Want me to step back and think through the approach?"
-- If a Slow assessment turns out to be a known pattern, suggest simplifying: "After looking at this, it's a straightforward [pattern]. Proceed directly?"
+- **Surface ripple impact, even in Fast mode.** If a seemingly simple change touches shared code (design tokens, interfaces, return type contracts) that other files or components depend on, note the scope in one sentence: "Done. Note: this also affects [other components using this]." If the change reveals an inconsistency or design issue across the codebase, surface it: "This exposes [pattern issue] — want me to address it more broadly?" This is still Fast — one sentence of awareness, not a full analysis.
+- **Downgrade when you recognize a known pattern.** For well-known solutions (pagination, CRUD, standard library swaps like `dateutil.parser`/`zod`, validation with existing deps like pydantic), skip clarifying questions and provide the standard solution directly. A brief one-line note on approach choice is fine, but deliver implementation value in the same response.
 
 ### User Override
 
