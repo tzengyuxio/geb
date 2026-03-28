@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "matcher": "startup|clear|compact",
+      "type": "SessionStart",
+      "command": "bash $CLAUDE_SKILL_DIR/hooks/session-start"
+    }
+  ]
+}
