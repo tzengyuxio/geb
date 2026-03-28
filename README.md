@@ -2,9 +2,7 @@
 
 **A thinking-centric adaptive framework for Claude Code.**
 
-> *Get Every Breakthrough · Go. Explore. Become. · Good Enough? Better! · Gosh! Eureka! Bazinga!*
->
-> *Named after [Gödel, Escher, Bach](https://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach) and [Geb](https://en.wikipedia.org/wiki/Geb), the Egyptian god of Earth — the invisible foundation beneath everything.*
+> Named after [Gödel, Escher, Bach](https://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach) and [Geb](https://en.wikipedia.org/wiki/Geb), the Egyptian god of Earth — the invisible foundation beneath everything.
 
 ---
 
