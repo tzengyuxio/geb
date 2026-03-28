@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SKILL_TARGET="$HOME/.claude/skills/prelude"
+SKILLS_DIR="$HOME/.claude/skills"
+SKILLS=(prelude geb-think geb-plan geb-align)
 
-echo "Uninstalling GEB framework..."
+echo "Uninstalling GEB..."
 
-if [ -L "$SKILL_TARGET" ]; then
-  rm "$SKILL_TARGET"
-  echo "  Removed skill symlink: $SKILL_TARGET"
-elif [ -d "$SKILL_TARGET" ]; then
-  rm -rf "$SKILL_TARGET"
-  echo "  Removed skill directory: $SKILL_TARGET"
-else
-  echo "  Skill not found at $SKILL_TARGET — nothing to remove."
-fi
+for skill in "${SKILLS[@]}"; do
+  target="$SKILLS_DIR/$skill"
+  if [ -L "$target" ]; then
+    rm "$target"
+    echo "  Removed: $skill"
+  elif [ -d "$target" ]; then
+    rm -rf "$target"
+    echo "  Removed: $skill"
+  fi
+done
 
-echo "Done. Restart Claude Code to deactivate."
+echo "Done."
