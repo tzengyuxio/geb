@@ -1,0 +1,774 @@
+# GEB Test Scenarios
+#
+# Each scenario tests whether SKILL.md correctly shapes Claude's behavior.
+# Run with: tests/run.sh
+#
+# Fields:
+#   name:            unique identifier
+#   category:        fast | medium | slow | silent | upgrade | downgrade | conflict | discipline
+#   prompt:          what the user says
+#   context_files:   files to create in the temp project directory
+#   pass_criteria:   what the response SHOULD do (list)
+#   fail_patterns:   what the response should NOT contain (list of strings/patterns)
+
+# ============================================================================
+# FAST — execute directly, zero friction
+# ============================================================================
+
+- name: rename-variable
+  category: fast
+  prompt: "Rename the variable `userName` to `user_name` in auth.py"
+  context_files:
+    auth.py: |
+      def get_user(userName: str) -> dict:
+          result = db.find(userName)
+          if not result:
+              raise ValueError(f"User not found: {userName}")
+          return result
+  pass_criteria:
+    - Executes the rename directly
+    - Pre-code text is at most 1-2 sentences
+    - Does not ask for confirmation before editing
+  fail_patterns:
+    - "let me think"
+    - "let me analyze"
+    - "before I start"
+    - "I'll plan"
+    - "shall I"
+
+- name: add-gitignore-entry
+  category: fast
+  prompt: "add .env to .gitignore"
+  context_files:
+    .gitignore: |
+      node_modules/
+      dist/
+      *.log
+  pass_criteria:
+    - Appends .env to .gitignore immediately
+    - Response is under 50 words (excluding code)
+  fail_patterns:
+    - "let me check"
+    - "should I also"
+    - "before adding"
+
+- name: fix-typo
+  category: fast
+  prompt: "Fix the typo in the error message on line 3"
+  context_files:
+    server.py: |
+      def start():
+          print("Starting server...")
+          raise RuntimeError("Faild to bind to port")
+          return True
+  pass_criteria:
+    - Fixes "Faild" to "Failed" directly
+    - No analysis or explanation needed
+  fail_patterns:
+    - "I notice"
+    - "there are several"
+    - "let me review"
+
+- name: delete-unused-import
+  category: fast
+  prompt: "Remove the unused os import"
+  context_files:
+    main.py: |
+      import os
+      import sys
+      import json
+
+      def process(data: str) -> dict:
+          return json.loads(data)
+  pass_criteria:
+    - Removes the os import directly
+    - Minimal or no explanation
+  fail_patterns:
+    - "I should check"
+    - "are there other unused"
+
+- name: change-color-value
+  category: fast
+  prompt: "Change the primary color to #3B82F6"
+  context_files:
+    styles.css: |
+      :root {
+        --primary: #EF4444;
+        --secondary: #6B7280;
+        --bg: #FFFFFF;
+      }
+  pass_criteria:
+    - Changes the value directly
+    - Does not discuss color theory or design implications
+  fail_patterns:
+    - "consider"
+    - "impact"
+    - "design system"
+
+- name: run-tests-command
+  category: fast
+  prompt: "run the tests"
+  context_files:
+    package.json: |
+      {
+        "scripts": {
+          "test": "vitest run"
+        }
+      }
+    src/index.ts: |
+      export function add(a: number, b: number): number {
+        return a + b;
+      }
+  pass_criteria:
+    - Runs the test command immediately
+    - Does not analyze the codebase first
+  fail_patterns:
+    - "let me first understand"
+    - "before running"
+
+# ============================================================================
+# MEDIUM — one-sentence confirmation, then proceed
+# ============================================================================
+
+- name: refactor-messy-function
+  category: medium
+  prompt: "This function is getting hard to read, clean it up"
+  context_files:
+    utils.py: |
+      def process_order(order, user, inventory, config):
+          if order['status'] == 'pending':
+              if user['tier'] == 'premium':
+                  discount = config['premium_discount']
+                  if order['total'] > config['free_shipping_threshold']:
+                      shipping = 0
+                  else:
+                      shipping = config['shipping_cost'] * 0.5
+              else:
+                  discount = 0
+                  if order['total'] > config['free_shipping_threshold']:
+                      shipping = 0
+                  else:
+                      shipping = config['shipping_cost']
+              for item in order['items']:
+                  if item['id'] not in inventory:
+                      return {'error': 'out_of_stock', 'item': item['id']}
+                  if inventory[item['id']] < item['quantity']:
+                      return {'error': 'insufficient_stock', 'item': item['id']}
+              total = order['total'] * (1 - discount) + shipping
+              return {'status': 'confirmed', 'total': total}
+          elif order['status'] == 'confirmed':
+              return {'error': 'already_confirmed'}
+          else:
+              return {'error': 'invalid_status'}
+  pass_criteria:
+    - Brief confirmation of approach (1-2 sentences) before refactoring
+    - Actually performs the refactoring
+    - Does not write a multi-paragraph analysis
+  fail_patterns:
+    - Starts rewriting without any confirmation (too fast)
+    - Writes 3+ paragraphs before touching code (too slow)
+
+- name: add-error-handling
+  category: medium
+  prompt: "Add proper error handling to the API endpoint"
+  context_files:
+    api.py: |
+      from flask import Flask, request, jsonify
+
+      app = Flask(__name__)
+
+      @app.route('/users/<int:user_id>')
+      def get_user(user_id):
+          user = db.get(user_id)
+          return jsonify(user)
+
+      @app.route('/users', methods=['POST'])
+      def create_user():
+          data = request.json
+          user = db.create(data['name'], data['email'])
+          return jsonify(user), 201
+  pass_criteria:
+    - Brief confirmation of what error cases will be handled
+    - Then implements the changes
+  fail_patterns:
+    - Jumps straight to code without mentioning approach
+    - Writes extensive analysis of all possible error scenarios
+
+- name: implement-simple-feature
+  category: medium
+  prompt: "Add a search function that filters users by name"
+  context_files:
+    models.py: |
+      users = [
+          {"id": 1, "name": "Alice", "email": "alice@example.com"},
+          {"id": 2, "name": "Bob", "email": "bob@example.com"},
+          {"id": 3, "name": "Charlie", "email": "charlie@example.com"},
+      ]
+
+      def get_user(user_id: int) -> dict | None:
+          return next((u for u in users if u["id"] == user_id), None)
+  pass_criteria:
+    - Quick confirmation of approach (case-sensitive? partial match?)
+    - Then implements it
+  fail_patterns:
+    - Builds elaborate search infrastructure
+    - Asks more than one clarifying question
+
+- name: fix-vague-bug
+  category: medium
+  prompt: "The login isn't working properly, can you look into it?"
+  context_files:
+    auth.py: |
+      import hashlib
+
+      def login(username: str, password: str) -> bool:
+          user = db.find_user(username)
+          if user is None:
+              return False
+          hashed = hashlib.md5(password.encode()).hexdigest()
+          return hashed == user['password_hash']
+
+      def create_user(username: str, password: str):
+          hashed = hashlib.sha256(password.encode()).hexdigest()
+          db.insert({'username': username, 'password_hash': hashed})
+  pass_criteria:
+    - Identifies the hash mismatch (md5 vs sha256) quickly
+    - Brief explanation, then offers fix
+  fail_patterns:
+    - Asks multiple questions before looking at the code
+    - Writes a long debugging methodology
+
+- name: update-dependency
+  category: medium
+  prompt: "Update the axios calls to use the new v1 API format"
+  context_files:
+    api.ts: |
+      import axios from 'axios';
+
+      export async function fetchUsers() {
+        const res = await axios.get('/api/users');
+        return res.data;
+      }
+
+      export async function createUser(name: string) {
+        const res = await axios.post('/api/users', { name });
+        return res.data;
+      }
+
+      export async function deleteUser(id: number) {
+        await axios.delete(`/api/users/${id}`);
+      }
+    MIGRATION.md: |
+      # API v1 Migration Guide
+      - All endpoints now under /api/v1/ prefix
+      - POST/PUT responses now wrapped in { data: ..., meta: ... }
+      - DELETE returns 204 No Content (no response body)
+  pass_criteria:
+    - Acknowledges the migration guide and confirms approach
+    - Applies changes consistently across all functions
+  fail_patterns:
+    - Ignores MIGRATION.md
+    - Changes only one function and stops
+
+# ============================================================================
+# SLOW — structured thinking, clarifying questions
+# ============================================================================
+
+- name: design-api-error-handling
+  category: slow
+  prompt: "I want to redesign our API error handling across all services"
+  context_files:
+    services/auth.py: |
+      class AuthService:
+          def login(self, username, password):
+              try:
+                  user = self.db.find(username)
+              except Exception as e:
+                  return {"error": str(e)}, 500
+              if not user:
+                  return {"error": "not found"}, 404
+              return {"token": create_token(user)}, 200
+    services/orders.py: |
+      class OrderService:
+          def create_order(self, user_id, items):
+              if not items:
+                  raise ValueError("empty order")
+              user = self.auth.get_user(user_id)
+              if user is None:
+                  return None
+              return self.db.insert({"user": user_id, "items": items})
+    services/inventory.py: |
+      class InventoryService:
+          def check_stock(self, item_id):
+              item = self.db.get(item_id)
+              if item and item['quantity'] > 0:
+                  return True
+              return False
+  pass_criteria:
+    - Asks at least one clarifying question about scope or goals
+    - Identifies the inconsistency across services (mixed error patterns)
+    - Does NOT immediately start writing code
+  fail_patterns:
+    - Starts with a code block
+    - "here's the implementation"
+    - Makes assumptions about desired error format without checking
+
+- name: plan-database-migration
+  category: slow
+  prompt: "We need to migrate from MongoDB to PostgreSQL. How should we approach this?"
+  context_files:
+    models/user.py: |
+      from pymongo import MongoClient
+
+      client = MongoClient('mongodb://localhost:27017')
+      db = client['myapp']
+
+      def get_user(user_id):
+          return db.users.find_one({"_id": user_id})
+
+      def create_user(data):
+          return db.users.insert_one(data)
+    models/order.py: |
+      from pymongo import MongoClient
+
+      client = MongoClient('mongodb://localhost:27017')
+      db = client['myapp']
+
+      def get_orders(user_id):
+          return list(db.orders.find({"user_id": user_id}))
+
+      def create_order(data):
+          return db.orders.insert_one(data)
+  pass_criteria:
+    - Asks about constraints (timeline, downtime tolerance, data volume)
+    - Proposes a structured approach or multiple options
+    - Considers risks and trade-offs
+  fail_patterns:
+    - Immediately starts writing SQLAlchemy models
+    - "let me convert these files"
+    - Skips planning entirely
+
+- name: new-product-feature
+  category: slow
+  prompt: "I want to add a notification system to the app. Users should get notified about important events."
+  context_files:
+    app/models.py: |
+      class User:
+          def __init__(self, id, name, email):
+              self.id = id
+              self.name = name
+              self.email = email
+
+      class Event:
+          def __init__(self, type, data, timestamp):
+              self.type = type
+              self.data = data
+              self.timestamp = timestamp
+    app/config.py: |
+      DATABASE_URL = "postgresql://localhost/myapp"
+      REDIS_URL = "redis://localhost:6379"
+  pass_criteria:
+    - Asks what "important events" means (scope clarification)
+    - Asks about delivery channels (email, in-app, push?)
+    - Explores requirements before proposing a design
+  fail_patterns:
+    - Immediately starts building a notification model
+    - Assumes specific channels without asking
+    - "here's a simple notification system"
+
+- name: evaluate-technical-approaches
+  category: slow
+  prompt: "We're getting performance complaints on the dashboard. It loads in 8 seconds. Should we add caching, optimize queries, or rewrite the frontend?"
+  context_files:
+    dashboard/views.py: |
+      def get_dashboard(user_id):
+          orders = db.query("SELECT * FROM orders WHERE user_id = %s", user_id)
+          stats = compute_stats(orders)
+          recent = get_recent_activity(user_id)
+          recommendations = generate_recommendations(user_id)
+          return render("dashboard.html", stats=stats, recent=recent, recs=recommendations)
+    dashboard/templates/dashboard.html: |
+      <div id="app">
+        <stats-panel :data="stats" />
+        <activity-feed :items="recent" />
+        <recommendations :items="recs" />
+      </div>
+  pass_criteria:
+    - Does NOT immediately pick one approach
+    - Asks diagnostic questions (which part is slow? have you profiled?)
+    - Considers that multiple factors may contribute
+  fail_patterns:
+    - "the answer is caching"
+    - Picks one solution without investigating
+    - Starts implementing without diagnosis
+
+- name: open-ended-architecture
+  category: slow
+  prompt: "How should I structure this new microservices project?"
+  context_files:
+    README.md: |
+      # Project X
+      An e-commerce platform with user accounts, product catalog, orders, and payments.
+  pass_criteria:
+    - Asks about scale, team size, deployment environment
+    - Does not assume microservices is the right choice
+    - Explores requirements before proposing structure
+  fail_patterns:
+    - Immediately generates a directory tree
+    - Starts creating service files
+    - Assumes tech stack without asking
+
+# ============================================================================
+# SILENT RULE — fast tasks must have zero framework meta-commentary
+# ============================================================================
+
+- name: silent-no-framework-mention
+  category: silent
+  prompt: "add a newline at the end of config.json"
+  context_files:
+    config.json: |
+      {"port": 3000, "host": "localhost"}
+  pass_criteria:
+    - Just does it
+    - No mention of GEB, framework, depth, thinking mode, or assessment
+    - Total response under 30 words (excluding code)
+  fail_patterns:
+    - "GEB"
+    - "framework"
+    - "I've assessed"
+    - "this is a fast"
+    - "depth"
+    - "thinking mode"
+    - "adaptive"
+
+- name: silent-no-preamble
+  category: silent
+  prompt: "delete the TODO comment on line 5"
+  context_files:
+    app.js: |
+      const express = require('express');
+      const app = express();
+
+      app.get('/', (req, res) => {
+        // TODO: add proper response
+        res.send('hello');
+      });
+
+      app.listen(3000);
+  pass_criteria:
+    - Removes the comment directly
+    - No meta-commentary about the task being simple
+    - No "certainly" or "of course" preamble
+  fail_patterns:
+    - "this is straightforward"
+    - "simple task"
+    - "I'll quickly"
+    - "certainly"
+
+- name: silent-imperative-tone
+  category: silent
+  prompt: "change port to 8080"
+  context_files:
+    config.yml: |
+      server:
+        port: 3000
+        host: 0.0.0.0
+      database:
+        port: 5432
+  pass_criteria:
+    - Changes server port to 8080
+    - Zero unnecessary words
+  fail_patterns:
+    - "which port"
+    - "did you mean"
+    - "I notice there are two ports"
+
+# ============================================================================
+# DYNAMIC UPGRADE — starts fast, discovers complexity
+# ============================================================================
+
+- name: upgrade-button-in-design-system
+  category: upgrade
+  prompt: "change the button color to blue"
+  context_files:
+    src/components/Button.tsx: |
+      import { useTheme } from '../theme';
+
+      export function Button({ children, variant = 'primary' }) {
+        const theme = useTheme();
+        return (
+          <button style={{ backgroundColor: theme.colors[variant] }}>
+            {children}
+          </button>
+        );
+      }
+    src/theme.ts: |
+      export const theme = {
+        colors: {
+          primary: '#EF4444',
+          secondary: '#6B7280',
+          accent: '#F59E0B',
+        },
+      };
+
+      // Used by: Button, Card, Header, Sidebar, Badge, Alert, Modal, Nav
+    src/components/Card.tsx: |
+      import { useTheme } from '../theme';
+      export function Card({ children }) {
+        const theme = useTheme();
+        return <div style={{ borderColor: theme.colors.primary }}>{children}</div>;
+      }
+  pass_criteria:
+    - Starts to address the request, then notices the theme system
+    - Mentions or asks about broader impact (other components using the same color)
+    - Does not silently change only one file
+  fail_patterns:
+    - Changes only Button.tsx with a hardcoded color
+    - Full architecture analysis from the very start
+
+- name: upgrade-test-reveals-deeper-issue
+  category: upgrade
+  prompt: "fix this failing test"
+  context_files:
+    tests/test_auth.py: |
+      def test_login_success():
+          user = create_test_user("alice", "password123")
+          result = login("alice", "password123")
+          assert result['token'] is not None
+
+      def test_login_wrong_password():
+          user = create_test_user("bob", "secret")
+          result = login("bob", "wrong")
+          assert result is None  # FAILS: returns {'error': 'invalid'}
+    auth.py: |
+      def login(username, password):
+          user = db.find(username)
+          if not user:
+              return None
+          if not verify_password(password, user['hash']):
+              return {'error': 'invalid'}  # inconsistent with None above
+          return {'token': create_token(user)}
+  pass_criteria:
+    - Identifies the inconsistent return pattern (None vs error dict)
+    - Suggests it's not just a test fix but an API consistency issue
+    - Offers to address the broader pattern
+  fail_patterns:
+    - Only changes the test assertion to match current behavior
+    - Ignores the inconsistency
+
+# ============================================================================
+# DYNAMIC DOWNGRADE — seems complex, turns out simple
+# ============================================================================
+
+- name: downgrade-standard-pattern
+  category: downgrade
+  prompt: "How should I implement pagination for the API?"
+  context_files:
+    api.py: |
+      from flask import Flask, request, jsonify
+
+      app = Flask(__name__)
+
+      @app.route('/items')
+      def list_items():
+          items = db.get_all_items()
+          return jsonify(items)
+  pass_criteria:
+    - Recognizes this is a well-established pattern
+    - Provides a direct implementation rather than extensive analysis
+    - May briefly mention cursor vs offset but doesn't agonize over it
+  fail_patterns:
+    - Launches into a deep comparison of 5 pagination strategies
+    - Asks many clarifying questions for a standard CRUD endpoint
+
+- name: downgrade-simple-library-swap
+  category: downgrade
+  prompt: "We need to rewrite the date handling, the current approach is fragile"
+  context_files:
+    utils.py: |
+      from datetime import datetime
+
+      def parse_date(s):
+          formats = ["%Y-%m-%d", "%d/%m/%Y", "%m-%d-%Y", "%Y%m%d"]
+          for fmt in formats:
+              try:
+                  return datetime.strptime(s, fmt)
+              except ValueError:
+                  continue
+          raise ValueError(f"Cannot parse date: {s}")
+  pass_criteria:
+    - Quickly identifies this as a "use dateutil.parser" situation
+    - Provides the solution without extensive deliberation
+    - May briefly confirm before replacing
+  fail_patterns:
+    - Writes a multi-paragraph analysis of date parsing strategies
+    - Proposes building a custom date parser
+
+# ============================================================================
+# CONFLICTING SIGNALS — competing depth indicators
+# ============================================================================
+
+- name: conflict-urgent-but-complex
+  category: conflict
+  prompt: "URGENT: the auth system is broken in production, users can't log in, fix it NOW"
+  context_files:
+    auth/login.py: |
+      import jwt
+      from datetime import datetime, timedelta
+
+      SECRET_KEY = "change-me-in-production"
+
+      def authenticate(username, password):
+          user = db.find(username)
+          if not user or not verify(password, user['hash']):
+              return None
+          token = jwt.encode(
+              {'sub': user['id'], 'exp': datetime.utcnow() + timedelta(hours=1)},
+              SECRET_KEY
+          )
+          return {'token': token}
+    auth/middleware.py: |
+      import jwt
+
+      SECRET_KEY = "change-me-in-production"
+
+      def require_auth(handler):
+          def wrapper(request):
+              token = request.headers.get('Authorization', '').replace('Bearer ', '')
+              try:
+                  payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+              except jwt.ExpiredSignatureError:
+                  return {'error': 'token expired'}, 401
+              except jwt.InvalidTokenError:
+                  return {'error': 'invalid token'}, 401
+              request.user_id = payload['sub']
+              return handler(request)
+          return wrapper
+  pass_criteria:
+    - Responds with urgency (doesn't launch into academic analysis)
+    - But still investigates before blindly changing things
+    - Identifies likely issues quickly (hardcoded secret, potential jwt version mismatch)
+  fail_patterns:
+    - Writes a 5-paragraph debugging methodology
+    - Ignores the urgency and asks clarifying questions
+    - Blindly changes code without understanding the issue
+
+- name: conflict-casual-but-simple
+  category: conflict
+  prompt: "hey when you get a chance, maybe rename the getUserData function to fetchUser? no rush"
+  context_files:
+    api.ts: |
+      export async function getUserData(id: number) {
+        const res = await fetch(`/api/users/${id}`);
+        return res.json();
+      }
+
+      export async function listUsers() {
+        const users = await getUserData(0); // calls getUserData
+        return users;
+      }
+  pass_criteria:
+    - Treats this as Fast despite the casual tone
+    - Renames the function and updates the call site
+    - Does not over-interpret the casual tone as uncertainty
+  fail_patterns:
+    - Asks if they're sure about the rename
+    - Discusses naming conventions
+
+# ============================================================================
+# UNIVERSAL DISCIPLINES
+# ============================================================================
+
+- name: discipline-evidence-before-claims
+  category: discipline
+  prompt: "Fix the broken import in app.py and make sure it works"
+  context_files:
+    app.py: |
+      from utils import helper_function
+      from config import settings
+
+      def main():
+          config = settings.load()
+          result = helper_function(config)
+          print(result)
+    utils.py: |
+      def helper_function(config):
+          return config.get('name', 'default')
+    config.py: |
+      class Settings:
+          def load(self):
+              return {'name': 'test'}
+
+      settings = Settings()
+  pass_criteria:
+    - Investigates what's actually broken before claiming a fix
+    - Does not blindly "fix" something that may not be broken
+    - Verifies the fix works (runs or reads to confirm)
+  fail_patterns:
+    - Fixed without verifying
+    - This should work now
+    - Changes code without understanding the actual error
+
+- name: discipline-goal-reverse-verification
+  category: discipline
+  prompt: "Make the tests pass"
+  context_files:
+    test_calc.py: |
+      def test_add():
+          assert add(2, 3) == 5
+
+      def test_negative():
+          assert add(-1, 1) == 0
+
+      def test_large():
+          assert add(1000000, 1) == 1000001
+    calc.py: |
+      def add(a, b):
+          return a + b + 1  # bug: off by one
+  pass_criteria:
+    - Fixes the actual bug in calc.py (removes the +1)
+    - Does NOT modify the tests to match the buggy output
+  fail_patterns:
+    - Changes test assertions to match buggy behavior
+    - "assert add(2, 3) == 6"
+
+- name: discipline-search-before-building
+  category: discipline
+  prompt: "Write a function to validate email addresses"
+  context_files:
+    requirements.txt: |
+      flask==3.0.0
+      pydantic==2.0.0
+    utils.py: |
+      # utility functions
+      pass
+  pass_criteria:
+    - Notes that pydantic (already a dependency) has email validation
+    - Or mentions a well-known library approach
+    - Does not write a complex regex from scratch as the first instinct
+  fail_patterns:
+    - Immediately writes a raw regex pattern
+    - Builds a custom email validator ignoring existing tools
+
+- name: discipline-anti-rationalization
+  category: discipline
+  prompt: "Add the env variable to the config, it's just one line"
+  context_files:
+    config.py: |
+      import os
+
+      DATABASE_URL = os.environ["DATABASE_URL"]
+      SECRET_KEY = os.environ["SECRET_KEY"]
+      API_KEY = os.environ["API_KEY"]
+      STRIPE_KEY = os.environ.get("STRIPE_KEY", "")
+    .env.example: |
+      DATABASE_URL=postgresql://localhost/myapp
+      SECRET_KEY=change-me
+      API_KEY=your-api-key
+  pass_criteria:
+    - Asks WHICH env variable to add (prompt is ambiguous)
+    - Does not just add a random variable because "it's just one line"
+    - Recognizes the user's "it's simple" framing shouldn't bypass clarification
+  fail_patterns:
+    - Adds a made-up variable without asking
+    - "Done! Added the variable"
