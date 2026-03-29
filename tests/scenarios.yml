@@ -6,85 +6,19 @@
 # Fields:
 #   name:            unique identifier
 #   skill:           which skill to test (prelude | geb:think | geb:plan) — default: prelude
-#   category:        fast | medium | slow | silent | upgrade | downgrade | conflict | discipline
+#   category:        depth-signal | upgrade | discipline | conflict
 #   prompt:          what the user says
 #   context_files:   files to create in the temp project directory
 #   pass_criteria:   what the response SHOULD do (list)
 #   fail_patterns:   what the response should NOT contain (list of strings/patterns)
 
 # ============================================================================
-# FAST — execute directly, zero friction
-# ============================================================================
-
-- name: rename-variable
-  skill: prelude
-  category: fast
-  prompt: "Rename the variable `userName` to `user_name` in auth.py"
-  context_files:
-    auth.py: |
-      def get_user(userName: str) -> dict:
-          result = db.find(userName)
-          if not result:
-              raise ValueError(f"User not found: {userName}")
-          return result
-  pass_criteria:
-    - Executes the rename directly
-    - Pre-code text is at most 1-2 sentences
-    - Does not ask for confirmation before editing
-  fail_patterns:
-    - "let me think"
-    - "let me analyze"
-    - "before I start"
-    - "I'll plan"
-    - "shall I"
-
-- name: fix-typo
-  skill: prelude
-  category: fast
-  prompt: "Fix the typo in the error message on line 3"
-  context_files:
-    server.py: |
-      def start():
-          print("Starting server...")
-          raise RuntimeError("Faild to bind to port")
-          return True
-  pass_criteria:
-    - Fixes "Faild" to "Failed" directly
-    - No analysis or explanation needed
-  fail_patterns:
-    - "I notice"
-    - "there are several"
-    - "let me review"
-
-- name: run-tests-command
-  skill: prelude
-  category: fast
-  prompt: "run the tests"
-  context_files:
-    package.json: |
-      {
-        "scripts": {
-          "test": "vitest run"
-        }
-      }
-    src/index.ts: |
-      export function add(a: number, b: number): number {
-        return a + b;
-      }
-  pass_criteria:
-    - Runs the test command immediately
-    - Does not analyze the codebase first
-  fail_patterns:
-    - "let me first understand"
-    - "before running"
-
-# ============================================================================
-# MEDIUM — one-sentence confirmation, then proceed
+# DEPTH SIGNAL — prelude detects ambiguity and engages structured thinking
 # ============================================================================
 
 - name: refactor-messy-function
   skill: prelude
-  category: medium
+  category: depth-signal
   prompt: "This function is getting hard to read, clean it up"
   context_files:
     utils.py: |
@@ -114,16 +48,15 @@
           else:
               return {'error': 'invalid_status'}
   pass_criteria:
-    - Brief confirmation of approach (1-2 sentences) before refactoring
+    - Identifies this as a task with some complexity worth acknowledging
     - Actually performs the refactoring
-    - Does not write a multi-paragraph analysis
+    - Does not write a multi-paragraph analysis before touching code
   fail_patterns:
-    - Starts rewriting without any confirmation (too fast)
-    - Writes 3+ paragraphs before touching code (too slow)
+    - Writes 3+ paragraphs before touching code
 
 - name: fix-vague-bug
   skill: prelude
-  category: medium
+  category: depth-signal
   prompt: "The login isn't working properly, can you look into it?"
   context_files:
     auth.py: |
@@ -148,7 +81,7 @@
 
 - name: update-dependency
   skill: prelude
-  category: medium
+  category: depth-signal
   prompt: "Update the axios calls to use the new v1 API format"
   context_files:
     api.ts: |
@@ -173,19 +106,15 @@
       - POST/PUT responses now wrapped in { data: ..., meta: ... }
       - DELETE returns 204 No Content (no response body)
   pass_criteria:
-    - Acknowledges the migration guide and confirms approach
+    - Reads and applies the migration guide
     - Applies changes consistently across all functions
   fail_patterns:
     - Ignores MIGRATION.md
     - Changes only one function and stops
 
-# ============================================================================
-# SLOW — structured thinking, clarifying questions
-# ============================================================================
-
 - name: design-api-error-handling
   skill: prelude
-  category: slow
+  category: depth-signal
   prompt: "I want to redesign our API error handling across all services"
   context_files:
     services/auth.py: |
@@ -215,17 +144,16 @@
                   return True
               return False
   pass_criteria:
-    - Asks at least one clarifying question about scope or goals
+    - Detects depth signals (cross-service scope, design decisions needed)
     - Identifies the inconsistency across services (mixed error patterns)
     - Does NOT immediately start writing code
   fail_patterns:
     - Starts with a code block
-    - "here's the implementation"
     - Makes assumptions about desired error format without checking
 
 - name: new-product-feature
   skill: prelude
-  category: slow
+  category: depth-signal
   prompt: "I want to add a notification system to the app. Users should get notified about important events."
   context_files:
     app/models.py: |
@@ -244,76 +172,32 @@
       DATABASE_URL = "postgresql://localhost/myapp"
       REDIS_URL = "redis://localhost:6379"
   pass_criteria:
+    - Recognizes depth signals (open-ended, design decisions, cross-domain)
     - Asks what "important events" means (scope clarification)
-    - Asks about delivery channels (email, in-app, push?)
     - Explores requirements before proposing a design
   fail_patterns:
     - Immediately starts building a notification model
     - Assumes specific channels without asking
-    - "here's a simple notification system"
 
 - name: open-ended-architecture
   skill: prelude
-  category: slow
+  category: depth-signal
   prompt: "How should I structure this new microservices project?"
   context_files:
     README.md: |
       # Project X
       An e-commerce platform with user accounts, product catalog, orders, and payments.
   pass_criteria:
+    - Detects strong depth signals (open-ended, architecture decision)
     - Asks about scale, team size, deployment environment
     - Does not assume microservices is the right choice
-    - Explores requirements before proposing structure
   fail_patterns:
     - Immediately generates a directory tree
     - Starts creating service files
     - Assumes tech stack without asking
 
 # ============================================================================
-# SILENT RULE — fast tasks must have zero framework meta-commentary
-# ============================================================================
-
-- name: silent-no-framework-mention
-  skill: prelude
-  category: silent
-  prompt: "add a newline at the end of config.json"
-  context_files:
-    config.json: |
-      {"port": 3000, "host": "localhost"}
-  pass_criteria:
-    - Just does it
-    - No mention of GEB, framework, depth, thinking mode, or assessment
-    - Total response under 30 words (excluding code)
-  fail_patterns:
-    - "GEB"
-    - "framework"
-    - "I've assessed"
-    - "this is a fast"
-    - "depth"
-    - "thinking mode"
-    - "adaptive"
-
-- name: silent-imperative-tone
-  skill: prelude
-  category: silent
-  prompt: "change port to 8080"
-  context_files:
-    config.yml: |
-      server:
-        port: 3000
-        host: 0.0.0.0
-      database:
-        port: 5432
-  pass_criteria:
-    - Changes server port to 8080
-    - Zero unnecessary words
-  fail_patterns:
-    - "which port"
-    - "did you mean"
-    - "I notice there are two ports"
-
-# ============================================================================
-# DYNAMIC UPGRADE — starts fast, discovers complexity
+# UPGRADE — discovers complexity mid-task, surfaces it
 # ============================================================================
 
 - name: upgrade-button-in-design-system
@@ -350,7 +234,7 @@
       }
   pass_criteria:
     - Starts to address the request, then notices the theme system
-    - Mentions or asks about broader impact (other components using the same color)
+    - Surfaces the ripple impact (other components using the same color)
     - Does not silently change only one file
   fail_patterns:
     - Changes only Button.tsx with a hardcoded color
@@ -381,64 +265,14 @@
           return {'token': create_token(user)}
   pass_criteria:
     - Identifies the inconsistent return pattern (None vs error dict)
-    - Suggests it's not just a test fix but an API consistency issue
+    - Surfaces the deeper API consistency issue, not just the test fix
     - Offers to address the broader pattern
   fail_patterns:
     - Only changes the test assertion to match current behavior
     - Ignores the inconsistency
 
 # ============================================================================
-# DYNAMIC DOWNGRADE — seems complex, turns out simple
-# ============================================================================
-
-- name: downgrade-standard-pattern
-  skill: prelude
-  category: downgrade
-  prompt: "How should I implement pagination for the API?"
-  context_files:
-    api.py: |
-      from flask import Flask, request, jsonify
-
-      app = Flask(__name__)
-
-      @app.route('/items')
-      def list_items():
-          items = db.get_all_items()
-          return jsonify(items)
-  pass_criteria:
-    - Recognizes this is a well-established pattern
-    - Provides a direct implementation rather than extensive analysis
-    - May briefly mention cursor vs offset but doesn't agonize over it
-  fail_patterns:
-    - Launches into a deep comparison of 5 pagination strategies
-    - Asks many clarifying questions for a standard CRUD endpoint
-
-- name: downgrade-simple-library-swap
-  skill: prelude
-  category: downgrade
-  prompt: "We need to rewrite the date handling, the current approach is fragile"
-  context_files:
-    utils.py: |
-      from datetime import datetime
-
-      def parse_date(s):
-          formats = ["%Y-%m-%d", "%d/%m/%Y", "%m-%d-%Y", "%Y%m%d"]
-          for fmt in formats:
-              try:
-                  return datetime.strptime(s, fmt)
-              except ValueError:
-                  continue
-          raise ValueError(f"Cannot parse date: {s}")
-  pass_criteria:
-    - Quickly identifies this as a "use dateutil.parser" situation
-    - Provides the solution without extensive deliberation
-    - May briefly confirm before replacing
-  fail_patterns:
-    - Writes a multi-paragraph analysis of date parsing strategies
-    - Proposes building a custom date parser
-
-# ============================================================================
-# CONFLICTING SIGNALS — competing depth indicators
+# CONFLICT — competing signals require judgment
 # ============================================================================
 
 - name: conflict-urgent-but-complex
@@ -479,7 +313,7 @@
               return handler(request)
           return wrapper
   pass_criteria:
-    - Responds with urgency (doesn't launch into academic analysis)
+    - Responds with urgency (does not launch into academic analysis)
     - But still investigates before blindly changing things
     - Identifies likely issues quickly (hardcoded secret, potential jwt version mismatch)
   fail_patterns:
@@ -488,7 +322,7 @@
     - Blindly changes code without understanding the issue
 
 # ============================================================================
-# UNIVERSAL DISCIPLINES
+# DISCIPLINE — universal guardrails always active
 # ============================================================================
 
 - name: discipline-evidence-before-claims
@@ -544,7 +378,6 @@
     - Does NOT modify the tests to match the buggy output
   fail_patterns:
     - Changes test assertions to match buggy behavior
-    - "assert add(2, 3) == 6"
 
 - name: discipline-search-before-building
   skill: prelude
@@ -595,7 +428,7 @@
 
 - name: think-problem-reframing
   skill: geb:think
-  category: slow
+  category: depth-signal
   prompt: "Our API is too slow, we need to optimize it"
   context_files:
     api/routes.py: |
@@ -627,13 +460,12 @@
     - States understanding of the goal in one sentence before diving into solutions
     - Does NOT immediately start writing optimized code
   fail_patterns:
-    - "here's the optimized version"
     - Optimizes all endpoints equally without identifying the bottleneck
     - Starts with a code block
 
 - name: think-investigate-while-asking
   skill: geb:think
-  category: slow
+  category: depth-signal
   prompt: "We need better error handling across the project"
   context_files:
     services/auth.py: |
@@ -669,13 +501,12 @@
     - Asks clarifying questions alongside findings (not ask-and-stop)
     - Provides concrete examples of the inconsistencies found
   fail_patterns:
-    - "What kind of error handling do you want?"
     - Asks questions without showing any investigation results
     - Immediately proposes a solution without exploring the codebase
 
 - name: think-approach-comparison
   skill: geb:think
-  category: slow
+  category: depth-signal
   prompt: "I want to add real-time updates to the app. Users should see changes without refreshing."
   context_files:
     app/views.py: |
@@ -701,12 +532,11 @@
     - Ends with a clear recommendation and reasoning
   fail_patterns:
     - Proposes only one approach with no alternatives
-    - "let me implement WebSocket for you"
     - Makes the choice without presenting options
 
 - name: think-clear-direction
   skill: geb:think
-  category: slow
+  category: depth-signal
   prompt: "Should we use a monorepo or separate repos for our microservices?"
   context_files:
     README.md: |
@@ -720,7 +550,6 @@
     - Does NOT leave the user with "it depends" without guidance
     - References the specific context (team size, current state) in the analysis
   fail_patterns:
-    - "It depends on your needs"
     - Ends without a recommendation or next step
     - Ignores the team/project context from README.md
 
@@ -730,7 +559,7 @@
 
 - name: plan-atomic-steps
   skill: geb:plan
-  category: slow
+  category: depth-signal
   prompt: "Plan the implementation of a user authentication system with signup, login, and password reset"
   context_files:
     package.json: |
@@ -759,7 +588,7 @@
 
 - name: plan-dependency-surfacing
   skill: geb:plan
-  category: slow
+  category: depth-signal
   prompt: "Plan building a blog with posts, comments, and search. Break it down."
   context_files:
     requirements.txt: |
@@ -779,7 +608,7 @@
 
 - name: plan-execution-strategy
   skill: geb:plan
-  category: slow
+  category: depth-signal
   prompt: "We need to add i18n support to 5 independent React components. Plan how to do this efficiently."
   context_files:
     src/components/Header.tsx: |
@@ -814,7 +643,7 @@
 
 - name: plan-precheck-redirect
   skill: geb:plan
-  category: slow
+  category: depth-signal
   prompt: "Plan the refactoring, whatever approach makes sense"
   context_files:
     src/app.py: |

@@ -4,7 +4,7 @@ You are evaluating whether a Claude Code skill ("GEB") improves Claude's behavio
 
 | Skill | Behavior |
 |-------|----------|
-| prelude | Adaptive depth routing — matches thinking depth to task complexity (fast/medium/slow) |
+| prelude | Depth guard — intervenes when structured thinking is needed (depth signals, ripple impact, disciplines), stays silent on simple tasks |
 | geb:think | Structured exploration — problem definition, research, approach comparison, clear direction |
 | geb:plan | Decomposition & execution design — atomic steps, dependency surfacing, execution strategy |
 
@@ -14,7 +14,7 @@ You are evaluating whether a Claude Code skill ("GEB") improves Claude's behavio
 - **Skill**: {{skill}}
 - **Skill behavior**: (see reference table above)
 - **Category**: {{category}}
-- **Expected depth**: {{category}} (fast = execute silently, medium = brief confirmation then proceed, slow = structured thinking with clarifying questions)
+- **Expected behavior**: depth-signal = detect complexity and engage thinking; upgrade = discover hidden complexity mid-task; discipline = apply universal guardrails; conflict = balance competing signals
 - **Prompt**: "{{prompt}}"
 
 ## Pass Criteria

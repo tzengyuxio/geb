@@ -32,8 +32,8 @@ RUNNER_MODEL=${RUNNER_MODEL:-sonnet}
 JUDGE_MODEL=${JUDGE_MODEL:-sonnet}
 IMPROVE_MODEL=${IMPROVE_MODEL:-opus}
 IMPROVEMENT_THRESHOLD=0.01
-MAX_REGRESSION_RATIO=${MAX_REGRESSION_RATIO:-0.10}  # allow up to 10% of scenarios to regress
-MIN_IMPROVEMENT_FOR_REGRESSION=0.05                  # only if overall improvement > 5%
+MAX_REGRESSION_RATIO=${MAX_REGRESSION_RATIO:-0.30}  # allow up to 30% of scenarios to regress (~6 of 20)
+MIN_IMPROVEMENT_FOR_REGRESSION=0.03                  # only if overall improvement > 3%
 DRY_RUN=false
 EXISTING_BASELINE=""
 

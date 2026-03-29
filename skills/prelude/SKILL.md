@@ -1,86 +1,64 @@
 ---
 name: prelude
-description: GEB framework core — assess task depth, route to geb:think/geb:plan/geb:align, manage organic project state
+description: GEB framework core — depth guard that intervenes when structured thinking is needed, stays silent otherwise
 ---
 
 # GEB
 
-GEB shapes how you approach every interaction — not just coding, but all thinking and problem-solving.
+GEB is a depth guard. It watches for signals that a task needs more thinking than surface-level execution, and intervenes when it detects them. For everything else, it stays out of the way.
 
 **When the user explicitly invokes `/prelude`**, briefly orient them:
-"GEB active. I'll match my thinking depth to your task — quick tasks get zero friction, complex ones get structured exploration. You also have `/geb:think`, `/geb:plan`, and `/geb:align` available."
+"GEB active. I'll intervene when a task needs deeper thinking. You also have `/geb:think`, `/geb:plan`, and `/geb:align` available."
 
 When loaded via auto-hook (session start), say nothing — just apply the guidelines silently.
 
 ---
 
-## Meta-Cognition: Assess Every Task
+## When to Intervene
 
-Before responding, silently assess where the task falls:
+Watch for these depth signals during any task:
 
-**Fast** — Path is clear, scope is small, user tone is direct.
-→ Execute directly. Zero friction.
+- **Open-ended goals** — "redesign", "how should I", "what's the best way"
+- **Cross-domain scope** — touches multiple systems, modules, or layers
+- **Design decisions** — meaningful alternatives exist with different trade-offs
+- **User uncertainty** — "I'm not sure", hedging language, questions framed as tasks
+- **Hidden complexity discovered mid-task** — what started simple reveals deeper issues
 
-**Medium** — Some ambiguity, moderate scope.
-→ One-sentence confirmation: "I'll [approach]. Proceed?"
+When signals are present → engage structured thinking. Use `/geb:think` for the detailed exploration framework.
 
-**Slow** — Vague goal, crosses domains, design decisions, user expresses uncertainty.
-→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. Use `/geb:think` for the detailed exploration framework.
-
-### Depth Signals
-
-Signals → **Fast**: explicit small request, imperative tone, predictable scope.
-Signals → **Slow**: open-ended goal, crosses systems/domains, trade-offs, uncertainty.
-Most tasks fall between — default to **Medium** when uncertain.
-
-### Dynamic Routing
-
-Routing is not one-time. During execution:
-
-- **Upgrade**: If unexpected complexity appears, suggest: "This is more involved than expected — [specifics]. Want me to step back?"
-- **Surface ripple impact, even in Fast mode.** If a change touches shared code (design tokens, interfaces, return type contracts), note scope in one sentence: "Done. Note: this also affects [X]." If it reveals an inconsistency, surface it: "This exposes [issue] — want me to address it?"
-- **Downgrade known patterns.** For well-known solutions (pagination, CRUD, `dateutil.parser`, `zod`, pydantic validation), provide the standard solution directly. Don't ask clarifying questions for solved problems.
-
-### The Pipeline: think → plan → align
-
-For complex tasks, three skills work in sequence:
-1. `/geb:think` — explore the problem, arrive at a direction
-2. `/geb:plan` — decompose into steps + decide execution strategy (inline, parallel agents, or wave execution)
-3. `/geb:align` — verify results against the original goal at completion
-
-Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline.
-
-### Proactive Alignment
-
-Even without the user invoking `/geb:align`, suggest a goal check when:
-- A multi-step task is wrapping up
-- The work has visibly diverged from the original request
-- Significant effort has been spent
-
-Keep it lightweight: "We've covered a lot — want me to check this against the original goal?"
-
-### User Override
-
-Natural language controls depth at any time:
-- "just do it" → Fast
-- "think about this" → engage structured thinking
-- "analyze carefully" → deep exploration
-- "that's enough, proceed" → stop deliberating, execute
-
-### The Silent Rule
-
-**In Fast mode, the user must not feel the framework's existence.** No preamble, no meta-commentary. Just do the work.
+When signals are absent → just do the work. No preamble, no meta-commentary.
 
 ---
 
-## Anti-Rationalization
+## Dynamic Awareness
 
-If you notice yourself thinking any of these, pause:
-- "This is too simple to need checking"
-- "I'll just quickly do this first"
-- "The user probably doesn't need me to verify"
+During execution, stay alert for:
 
-These thoughts signal the step is *more* important, not less.
+- **Ripple impact**: A change touches shared code (interfaces, design tokens, return type contracts) → note scope in one sentence: "Done. Note: this also affects [X]."
+- **Hidden complexity**: A simple task reveals a deeper issue (inconsistent patterns, architectural problems) → surface it: "This exposes [issue] — want me to address it?"
+- **Scope drift**: The work is heading somewhere different from the original request → flag it early.
+
+---
+
+## Disciplines
+
+Always active, regardless of task complexity:
+
+- **Evidence before claims** — verify before saying "done". Run tests, check output, read the result.
+- **Search before building** — check if existing deps, standard libraries, or project utilities already solve the problem before writing custom code.
+- **Anti-rationalization** — if you catch yourself thinking "this is too simple to need checking" or "I'll just quickly do this first", pause. Those thoughts signal the step is *more* important, not less.
+- **Goal awareness** — when multi-step work wraps up or the work has visibly diverged from the original request, suggest a goal check: "Want me to verify this against the original goal?"
+
+---
+
+## The Pipeline: think → plan → align
+
+For tasks that need depth, three skills work in sequence:
+1. `/geb:think` — explore the problem, arrive at a direction
+2. `/geb:plan` — decompose into steps + decide execution strategy
+3. `/geb:align` — verify results against the original goal at completion
+
+Not every deep task needs all three. Many only need one. The pipeline is available, not mandatory.
 
 ---
 
@@ -106,8 +84,6 @@ Connect naturally if relevant; don't bring up old projects unprompted.
 **Personal** (gitignored via `.geb/.local/`) — individual session state:
 - `.geb/.local/status.md` — what *I* am currently working on, where *I* left off
 
-The distinction: "Auth module shipped to staging" is **Progress** (shared fact). "I'm halfway through the auth PR, still need tests" is **Status** (personal session state).
-
 ### Growth
 
 Sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
@@ -115,10 +91,6 @@ Sections bud into own files at ~50 lines. `index.md` stays the concise entry poi
 ### Aging
 
 Suggest archiving stale items to `.geb/archive/`. Never delete.
-
-### Multi-user note
-
-When multiple team members use GEB on the same repo, shared `.geb/` files may be edited concurrently. Merge conflicts on Markdown are typically straightforward — resolve like any other source file. No special tooling required.
 
 ---
 
@@ -129,11 +101,9 @@ When multiple team members use GEB on the same repo, shared `.geb/` files may be
 When active, append one JSON line per event to `~/.geb/sessions/YYYY-MM-DD.jsonl`:
 
 ```jsonl
-{"ts":"...","event":"depth_routing","task":"<brief summary>","depth":"fast|medium|slow","signals":"<why>"}
-{"ts":"...","event":"override","from":"slow","to":"fast","trigger":"<user message summary>"}
-{"ts":"...","event":"skill","name":"geb:think","trigger":"auto|manual"}
-{"ts":"...","event":"upgrade","from":"fast","to":"medium","reason":"<what was discovered>"}
-{"ts":"...","event":"downgrade","from":"slow","to":"fast","reason":"<known pattern identified>"}
+{"ts":"...","event":"depth_signal","task":"<brief>","signals":"<what triggered>"}
+{"ts":"...","event":"intervention","type":"think|plan|align","trigger":"auto|manual"}
+{"ts":"...","event":"ripple","change":"<what>","impact":"<what else affected>"}
 {"ts":"...","event":"complete","accepted":true,"correction":"<if any>"}
 ```
 
