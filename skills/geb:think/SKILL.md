@@ -5,7 +5,7 @@ description: Structured thinking for complex tasks — use before executing when
 
 # GEB Think — Structured Exploration
 
-This task needs thinking before doing. Clarify the problem, explore the space, and arrive at a clear direction.
+Apply structured exploration to clarify the problem and arrive at a clear direction.
 
 ## Core Principle: Investigate While Asking
 
@@ -36,6 +36,7 @@ Don't reinvent. Check if the problem is already solved by project dependencies o
 
 - If the research topic is too large, produce a **research method** rather than trying to cover everything
 - For well-known patterns, skip research and go straight to approach design
+- Use the Explore agent for thorough codebase research when the scope is unclear
 
 ### 3. Approach Design
 
@@ -51,6 +52,10 @@ End with one of:
 - A clear recommendation: "I recommend [X] because [Y]. Proceed?"
 - A key question that unblocks: "The main decision is [X]. Which way do you lean?"
 - A reframed problem: "After looking at this, the real issue is [Y], not [original X]."
+
+## Scope
+
+Aim to reach a direction within one response. If you can't, state what's blocking and what information would unblock it — don't spiral into open-ended analysis.
 
 ## What's Next
 

@@ -5,7 +5,7 @@ description: Verify results against original goals — use at completion checkpo
 
 # GEB Align — Goal Verification
 
-Check whether what was built matches what was intended.
+Check whether what was done matches what was intended.
 
 ## The Check
 
@@ -22,7 +22,14 @@ Go back to the source: the user's original request, `.geb/index.md`, or the plan
 | **Drift** | Did scope expand or shift during execution? Was that justified? |
 | **Side effects** | Did we change anything unrequested? Is that OK? |
 
-### 3. Surface findings
+### 3. Verify quality
+
+If applicable, run automated checks — don't just verify alignment on paper:
+- Run tests, linters, or type checkers
+- Check for build errors
+- Spot-check the output manually if automated checks aren't available
+
+### 4. Surface findings
 
 Be direct:
 

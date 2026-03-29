@@ -7,8 +7,10 @@ description: GEB framework core — assess task depth, route to geb:think/geb:pl
 
 GEB shapes how you approach every interaction — not just coding, but all thinking and problem-solving.
 
-**On activation, briefly orient the user:**
+**When the user explicitly invokes `/prelude`**, briefly orient them:
 "GEB active. I'll match my thinking depth to your task — quick tasks get zero friction, complex ones get structured exploration. You also have `/geb:think`, `/geb:plan`, and `/geb:align` available."
+
+When loaded via auto-hook (session start), say nothing — just apply the guidelines silently.
 
 ---
 
@@ -23,7 +25,7 @@ Before responding, silently assess where the task falls:
 → One-sentence confirmation: "I'll [approach]. Proceed?"
 
 **Slow** — Vague goal, crosses domains, design decisions, user expresses uncertainty.
-→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. (The `/geb:think` skill provides a detailed framework for this.)
+→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. Use `/geb:think` for the detailed exploration framework.
 
 ### Depth Signals
 
@@ -36,7 +38,7 @@ Most tasks fall between — default to **Medium** when uncertain.
 Routing is not one-time. During execution:
 
 - **Upgrade**: If unexpected complexity appears, suggest: "This is more involved than expected — [specifics]. Want me to step back?"
-- **Surface ripple impact, even in Fast mode.** If a change touches shared code (design tokens, interfaces, return type contracts), note scope in one sentence: "Done. Note: this also affects [X]." Surface inconsistencies: "This exposes [issue] — want me to address it?" Still Fast — one sentence, not full analysis.
+- **Surface ripple impact, even in Fast mode.** If a change touches shared code (design tokens, interfaces, return type contracts), note scope in one sentence: "Done. Note: this also affects [X]." If it reveals an inconsistency, surface it: "This exposes [issue] — want me to address it?"
 - **Downgrade known patterns.** For well-known solutions (pagination, CRUD, `dateutil.parser`, `zod`, pydantic validation), provide the standard solution directly. Don't ask clarifying questions for solved problems.
 
 ### The Pipeline: think → plan → align
@@ -46,7 +48,7 @@ For complex tasks, three skills work in sequence:
 2. `/geb:plan` — decompose into steps + decide execution strategy (inline, parallel agents, or wave execution)
 3. `/geb:align` — verify results against the original goal at completion
 
-Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline. For large plans, `/geb:plan` handles subagent orchestration — keeping the main session lean while delegating concrete work with curated context.
+Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline.
 
 ### Proactive Alignment
 
@@ -86,9 +88,15 @@ These thoughts signal the step is *more* important, not less.
 
 For projects spanning multiple sessions, use `.geb/` for organic project memory. **Do NOT create preemptively** — only when knowledge worth preserving accumulates.
 
-### Two layers: shared + personal
+### Session start behavior
 
-`.geb/` contains two layers with different scopes:
+If the current directory contains `.geb/`, actively read these files at the start of the conversation:
+1. `.geb/.local/status.md` (personal — where I left off)
+2. `.geb/index.md` (shared — project context)
+
+Connect naturally if relevant; don't bring up old projects unprompted.
+
+### Two layers: shared + personal
 
 **Shared** (committed to git) — team knowledge:
 - `.geb/index.md` — Goal (one sentence), Progress (milestone facts), Notes (decisions, open questions)
@@ -103,14 +111,6 @@ The distinction: "Auth module shipped to staging" is **Progress** (shared fact).
 ### Growth
 
 Sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
-
-### Session continuity
-
-At session start, silently read in order:
-1. `.geb/.local/status.md` (personal — where I left off)
-2. `.geb/index.md` (shared — project context)
-
-Connect naturally if relevant; don't bring up old projects unprompted.
 
 ### Aging
 

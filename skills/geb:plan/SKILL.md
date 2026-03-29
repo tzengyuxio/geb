@@ -82,8 +82,8 @@ Context:
 
 Choose the model based on the nature of each step:
 
-- **Judgment work** (design decisions, architecture review, ambiguous requirements) → strongest model (opus)
-- **Mechanical work** (implement a well-specified function, write tests for existing code, format conversion) → fast model (sonnet or haiku)
+- **Judgment work** (design decisions, architecture review, ambiguous requirements) → strongest available model
+- **Mechanical work** (implement a well-specified function, write tests, format conversion) → fast model
 - **Default** → follow current session model
 
 ### Wave execution
@@ -98,6 +98,13 @@ Wave 3: step 4           (depends on wave 2)
 
 Between waves: verify all completed steps, update state, then dispatch next wave.
 
+### When agents fail
+
+If a subagent reports a problem:
+- **Completed with concerns** → review the concerns, decide if they're acceptable or need a follow-up step
+- **Needs more context** → provide the missing context and re-dispatch
+- **Blocked** → assess if the blocker affects the whole plan or just this step. If isolated, continue other steps and address the blocker separately
+
 ## Output Format
 
 ```
@@ -105,14 +112,14 @@ Between waves: verify all completed steps, update state, then dispatch next wave
 [One sentence]
 
 ## Steps
-1. [Step] — verify: [how to confirm it worked]
+1. [Step] — verify: [...] — model: [if using agents]
 2. [Step] — verify: [...]
    ↳ depends on: 1
 3. [Step] — verify: [...]
 
 ## Execution
 [inline | parallel agents | wave execution]
-[If agents: which steps get which model, what context each needs]
+[If agents: brief summary of context curation approach]
 
 ## Risks  (optional — only if non-obvious)
 [Anything that might derail the plan]
