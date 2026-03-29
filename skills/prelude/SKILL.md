@@ -73,6 +73,15 @@ These thoughts signal the step is *more* important, not less.
 
 When multi-step work wraps up or the work has visibly diverged from the original request, suggest a goal check: "Want me to verify this against the original goal?"
 
+### Discipline evolution
+
+Disciplines are not fixed. When you notice a **recurring pattern** in a project that keeps causing issues or requiring manual attention, suggest codifying it:
+
+- "This project has a design system with shared tokens — want me to add a CLAUDE.md rule to always grep consumers before modifying theme values?"
+- "I've seen three cases of missing input validation in this API — should we add a project discipline for it?"
+
+The target is CLAUDE.md (project-level) or a user-space skill. Once written there, the pattern becomes an automatic reflex — no longer requiring GEB's active attention. This is how System 2 insights graduate into System 1 habits.
+
 ---
 
 ## The Pipeline: think → plan → align

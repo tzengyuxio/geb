@@ -21,15 +21,26 @@ Go back to the source: the user's original request, `.geb/index.md`, or the plan
 | **Accuracy** | Does the result match the intent, or did we solve a different problem? |
 | **Drift** | Did scope expand or shift during execution? Was that justified? |
 | **Side effects** | Did we change anything unrequested? Is that OK? |
+| **Ripple impact** | Did we modify shared code (interfaces, types, tokens, configs)? What else consumes it? |
 
-### 3. Verify quality
+### 3. Check ripple impact
 
-If applicable, run automated checks — don't just verify alignment on paper:
+For each modified file, ask: **does anything else depend on what I changed?**
+
+- If you modified an interface, type, or return contract → grep for all consumers and verify they still work.
+- If you modified shared config (theme tokens, env vars, feature flags) → list all files that reference them.
+- If you changed function signatures → check all call sites.
+
+Surface anything unreviewd: "Changed `theme.colors.primary` — also used by Card, Header, Sidebar, Badge, Alert, Modal, Nav. Verified they all still render correctly." Or: "Changed `login()` return type — 3 call sites updated, but `middleware.py` also calls it and may need attention."
+
+### 4. Verify quality
+
+Run automated checks — don't just verify alignment on paper:
 - Run tests, linters, or type checkers
 - Check for build errors
 - Spot-check the output manually if automated checks aren't available
 
-### 4. Surface findings
+### 5. Surface findings
 
 Be direct:
 
