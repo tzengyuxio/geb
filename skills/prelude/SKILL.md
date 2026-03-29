@@ -43,10 +43,10 @@ Routing is not one-time. During execution:
 
 For complex tasks, three skills work in sequence:
 1. `/geb:think` — explore the problem, arrive at a direction
-2. `/geb:plan` — decompose the chosen approach into executable steps
+2. `/geb:plan` — decompose into steps + decide execution strategy (inline, parallel agents, or wave execution)
 3. `/geb:align` — verify results against the original goal at completion
 
-Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline.
+Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline. For large plans, `/geb:plan` handles subagent orchestration — keeping the main session lean while delegating concrete work with curated context.
 
 ### Proactive Alignment
 

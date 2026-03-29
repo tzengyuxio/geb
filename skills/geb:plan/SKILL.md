@@ -5,7 +5,7 @@ description: Decompose a decided approach into executable steps — use after th
 
 # GEB Plan — Decomposition & Execution Design
 
-The direction is clear. Break it into executable steps.
+The direction is clear. Break it into executable steps and decide how to execute them.
 
 ## Pre-check
 
@@ -38,6 +38,66 @@ Mark which steps depend on others. Independent steps can be parallelized.
 - More than 10 steps → split into phases
 - Steps should be roughly similar effort — if one is 10x larger, break it down
 
+## Execution Strategy
+
+After decomposing steps, decide how to execute them:
+
+### When to use subagents
+
+| Situation | Strategy |
+|-----------|----------|
+| 3 or fewer steps, all sequential | Execute inline — no subagents needed |
+| Independent steps that don't share state | Spawn parallel agents — each gets curated context |
+| Large plan with mixed dependencies | Wave execution — batch independent steps per wave |
+
+### Orchestrator thin, Worker well-fed
+
+When delegating to subagents, the main session becomes an orchestrator:
+
+**Orchestrator (you) responsibilities:**
+- Hold the plan and global context
+- Dispatch each task with curated context (don't say "go figure it out" — give the agent everything it needs)
+- Collect results and verify against the step's "done" condition
+- Update progress state after each step
+- Quality gate: review agent output before proceeding
+
+**What to give each agent:**
+- The specific step description and verification criteria
+- Relevant source files or context (pre-extracted, not "go read the whole repo")
+- Constraints: what NOT to touch, scope boundaries
+- Expected output format
+
+**Example agent dispatch:**
+```
+Agent: "Implement the search module"
+Context:
+  - Step: "Create search.rs with fuzzy matching using nucleo crate"
+  - Verify: "cargo test search:: passes"
+  - Relevant files: src/notes.rs (Note struct definition), Cargo.toml
+  - Constraint: only create/modify src/search.rs
+  - Model: sonnet (well-specified implementation task)
+```
+
+### Model selection
+
+Choose the model based on the nature of each step:
+
+- **Judgment work** (design decisions, architecture review, ambiguous requirements) → strongest model (opus)
+- **Mechanical work** (implement a well-specified function, write tests for existing code, format conversion) → fast model (sonnet or haiku)
+- **Default** → follow current session model
+
+### Wave execution
+
+For plans with mixed dependencies, execute in waves:
+
+```
+Wave 1: steps 1, 5       (independent — run in parallel)
+Wave 2: steps 2, 3       (depend on wave 1 — run in parallel)
+Wave 3: step 4           (depends on wave 2)
+```
+
+Between waves: verify all completed steps, update state, then dispatch next wave.
+
 ## Output Format
 
 ```
@@ -50,10 +110,11 @@ Mark which steps depend on others. Independent steps can be parallelized.
    ↳ depends on: 1
 3. [Step] — verify: [...]
 
-## Parallel opportunities  (optional — only if parallelizable steps exist)
-[Which steps can run concurrently]
+## Execution
+[inline | parallel agents | wave execution]
+[If agents: which steps get which model, what context each needs]
 
-## Risks  (optional — only if non-obvious risks exist)
+## Risks  (optional — only if non-obvious)
 [Anything that might derail the plan]
 ```
 
@@ -62,7 +123,7 @@ After presenting the plan, ask: "Ready to start, or adjust anything?"
 ## Persistence
 
 If this is a multi-session project with `.geb/index.md`:
-- Save the plan to shared state: in `index.md` Notes, or as `.geb/plan.md` if substantial. This is team knowledge — others benefit from seeing the plan.
-- Save your current position to `.geb/.local/status.md` (e.g., "Executing step 3 of 5, steps 1-2 done"). This is personal session state — only you need it.
+- Save the plan to shared state: in `index.md` Notes, or as `.geb/plan.md` if substantial.
+- Save your current position to `.geb/.local/status.md` (e.g., "Executing step 3 of 5, steps 1-2 done").
 
 Plans that only live in the conversation are lost on context reset.
