@@ -62,53 +62,12 @@ for SCENARIO_DIR in $SCENARIO_DIRS; do
   CURRENT=$((CURRENT + 1))
   echo "[$CURRENT/$TOTAL] Judging: $SCENARIO_NAME"
 
-  # Read scenario metadata
-  SCENARIO_META=$(cat "$SCENARIO_DIR/scenario.yml")
-  WITH_GEB=$(cat "$SCENARIO_DIR/with-geb.md")
-  CONTROL=$(cat "$SCENARIO_DIR/control.md")
+  # Extract skill/category for scores.yml (simple grep, no python needed)
+  SKILL=$(grep '^skill:' "$SCENARIO_DIR/scenario.yml" | head -1 | cut -d' ' -f2-)
+  SKILL="${SKILL:-prelude}"
+  CATEGORY=$(grep '^category:' "$SCENARIO_DIR/scenario.yml" | head -1 | cut -d' ' -f2-)
 
-  # Extract fields from scenario.yml
-  CATEGORY=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); print([l.split(': ',1)[1].strip() for l in lines if l.startswith('category:')][0])")
-  SKILL=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); matches=[l.split(': ',1)[1].strip() for l in lines if l.startswith('skill:')]; print(matches[0] if matches else 'prelude')")
-  PROMPT=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); print([l.split(': ',1)[1].strip() for l in lines if l.startswith('prompt:')][0])")
-
-  PASS_CRITERIA=$(echo "$SCENARIO_META" | python3 -c "
-import sys
-lines = sys.stdin.readlines()
-in_section = False
-for l in lines:
-    if l.startswith('pass_criteria:'):
-        in_section = True
-        continue
-    if in_section:
-        if l.startswith('  - '):
-            print(l.strip())
-        else:
-            break
-")
-
-  FAIL_PATTERNS=$(echo "$SCENARIO_META" | python3 -c "
-import sys
-lines = sys.stdin.readlines()
-in_section = False
-for l in lines:
-    if l.startswith('fail_patterns:'):
-        in_section = True
-        continue
-    if in_section:
-        if l.startswith('  - '):
-            print(l.strip())
-        else:
-            break
-")
-
-  # Build judge prompt from template
-  JUDGE_PROMPT=$(cat "$JUDGE_TEMPLATE")
-  JUDGE_PROMPT="${JUDGE_PROMPT//\{\{name\}\}/$SCENARIO_NAME}"
-  JUDGE_PROMPT="${JUDGE_PROMPT//\{\{category\}\}/$CATEGORY}"
-  JUDGE_PROMPT="${JUDGE_PROMPT//\{\{prompt\}\}/$PROMPT}"
-
-  # Use Python for safe substitution of multi-line content
+  # Build judge prompt — single Python call handles all template substitution
   FULL_PROMPT=$(python3 -c "
 import sys
 template = open('$JUDGE_TEMPLATE').read()

@@ -71,6 +71,20 @@ resolve_skill_file() {
   fi
 }
 
+# Write context_files from scenario JSON to a target directory
+create_context_files() {
+  local target_dir="$1"
+  echo "$SCENARIO_DATA" | python3 -c "
+import json, sys, os
+s = json.load(sys.stdin)
+for path, content in s.get('context_files', {}).items():
+    full = os.path.join('$target_dir', path)
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    with open(full, 'w') as f:
+        f.write(content)
+"
+}
+
 mkdir -p "$RESULTS_DIR"
 
 # Save run metadata
@@ -124,6 +138,11 @@ if [ "$RUN_GEB" = true ] && [ -n "$SKILL_OVERRIDE" ]; then
 fi
 
 for SCENARIO_NAME in $SCENARIO_NAMES; do
+  # Quick name filter — no Python needed
+  if [ -n "$FILTER_SCENARIO" ] && [ "$SCENARIO_NAME" != "$FILTER_SCENARIO" ]; then
+    continue
+  fi
+
   # Extract scenario data with Python
   SCENARIO_DATA=$(python3 -c "
 import yaml, json, sys
@@ -138,13 +157,12 @@ for s in scenarios:
   PROMPT=$(echo "$SCENARIO_DATA" | python3 -c "import json,sys; print(json.load(sys.stdin)['prompt'])")
   SCENARIO_SKILL=$(echo "$SCENARIO_DATA" | python3 -c "import json,sys; print(json.load(sys.stdin).get('skill', 'prelude'))")
 
-  # Apply filters
-  if [ -n "$FILTER_SCENARIO" ] && [ "$SCENARIO_NAME" != "$FILTER_SCENARIO" ]; then
-    continue
-  fi
+  # Skill filter
   if [ -n "$FILTER_SKILL" ] && [ "$SCENARIO_SKILL" != "$FILTER_SKILL" ]; then
     continue
   fi
+
+  CURRENT=$((CURRENT + 1))
 
   # Resolve the skill file for this scenario
   if [ -n "$SKILL_OVERRIDE" ]; then
@@ -188,15 +206,7 @@ for p in s.get('fail_patterns', []):
 
   # Create temp project directory with context files
   TEMP_DIR=$(mktemp -d)
-  echo "$SCENARIO_DATA" | python3 -c "
-import json, sys, os
-s = json.load(sys.stdin)
-for path, content in s.get('context_files', {}).items():
-    full = os.path.join('$TEMP_DIR', path)
-    os.makedirs(os.path.dirname(full), exist_ok=True)
-    with open(full, 'w') as f:
-        f.write(content)
-"
+  create_context_files "$TEMP_DIR"
 
   # Run WITH GEB (cd to temp dir so Claude sees the files)
   if [ "$RUN_GEB" = true ] && [ -n "$SKILL_CONTENT" ]; then
@@ -213,18 +223,9 @@ for path, content in s.get('context_files', {}).items():
 
   # Run WITHOUT GEB (control)
   if [ "$RUN_CONTROL" = true ]; then
-    # Recreate temp dir for clean state
     rm -rf "$TEMP_DIR"
     TEMP_DIR=$(mktemp -d)
-    echo "$SCENARIO_DATA" | python3 -c "
-import json, sys, os
-s = json.load(sys.stdin)
-for path, content in s.get('context_files', {}).items():
-    full = os.path.join('$TEMP_DIR', path)
-    os.makedirs(os.path.dirname(full), exist_ok=True)
-    with open(full, 'w') as f:
-        f.write(content)
-"
+    create_context_files "$TEMP_DIR"
     echo "  → control..."
     (cd "$TEMP_DIR" && claude -p "$PROMPT" \
       --disable-slash-commands \

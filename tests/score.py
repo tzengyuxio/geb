@@ -33,15 +33,10 @@ COMPARISON_WEIGHTS = {
 DEFAULT_SKILL = "prelude"
 
 
-def load_skill_map(scores_path: Path) -> dict:
+def load_skill_map() -> dict:
     """Build a name->skill map from tests/scenarios.yml for fallback lookup."""
     skill_map = {}
-    # scenarios.yml lives in tests/ — same dir as score.py
-    # scores_path is tests/results/<ts>/scores.yml, so .parent.parent.parent = tests/
-    scenarios_yml = scores_path.parent.parent.parent / "scenarios.yml"
-    if not scenarios_yml.exists():
-        # Fallback: relative to the script itself
-        scenarios_yml = Path(__file__).parent / "scenarios.yml"
+    scenarios_yml = Path(__file__).parent / "scenarios.yml"
     if scenarios_yml.exists():
         with open(scenarios_yml) as f:
             scenarios = yaml.safe_load(f)
@@ -156,8 +151,8 @@ def main():
         print("No scenarios found in scores file")
         sys.exit(1)
 
-    # Build skill lookup for fallback when skill is missing from scores.yml entries
-    skill_map = load_skill_map(scores_path)
+    # Lazy-loaded: only parsed if a scenario is missing the skill field
+    skill_map = None
 
     results = []
     category_scores = {}
@@ -166,7 +161,11 @@ def main():
     for scenario in scenarios:
         name = scenario.get("name", "unknown")
         category = scenario.get("category", "unknown")
-        skill = scenario.get("skill") or skill_map.get(name, DEFAULT_SKILL)
+        skill = scenario.get("skill")
+        if not skill:
+            if skill_map is None:
+                skill_map = load_skill_map()
+            skill = skill_map.get(name, DEFAULT_SKILL)
         judge_raw = scenario.get("judge_output", "")
 
         parsed = parse_judge_output(judge_raw)

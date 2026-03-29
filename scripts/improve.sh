@@ -97,6 +97,19 @@ find_latest_run() {
   ls -td "$TESTS_DIR/results"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-* 2>/dev/null | grep -v 'improve-' | head -1
 }
 
+# Helper: copy control results from source to target run directory
+merge_control_results() {
+  local source_dir="$1"
+  local target_dir="$2"
+  for scenario_dir in "$source_dir"/*/; do
+    local scenario_name
+    scenario_name=$(basename "$scenario_dir")
+    if [ -f "$scenario_dir/control.md" ]; then
+      cp "$scenario_dir/control.md" "$target_dir/$scenario_name/control.md" 2>/dev/null || true
+    fi
+  done
+}
+
 # Helper: build improver prompt using temp files (avoids shell escaping issues)
 build_improve_prompt() {
   local skill_file="$1"
@@ -162,13 +175,7 @@ else
     bash "$TESTS_DIR/run.sh" --filter-skill "$TARGET_SKILL" --control-only 2>&1 | tail -5
   CONTROL_RUN=$(find_latest_run)
 
-  # Merge control results into GEB run
-  for scenario_dir in "$CONTROL_RUN"/*/; do
-    scenario_name=$(basename "$scenario_dir")
-    if [ -f "$scenario_dir/control.md" ]; then
-      cp "$scenario_dir/control.md" "$LATEST_RUN/$scenario_name/control.md" 2>/dev/null || true
-    fi
-  done
+  merge_control_results "$CONTROL_RUN" "$LATEST_RUN"
 
   echo "Judging baseline..."
   env JUDGE_MODEL="$JUDGE_MODEL" \
@@ -275,13 +282,7 @@ for ROUND in $(seq 1 "$MAX_ROUNDS"); do
 
   CANDIDATE_RUN=$(find_latest_run)
 
-  # Copy control results into candidate run
-  for scenario_dir in "$CONTROL_RUN"/*/; do
-    scenario_name=$(basename "$scenario_dir")
-    if [ -f "$scenario_dir/control.md" ]; then
-      cp "$scenario_dir/control.md" "$CANDIDATE_RUN/$scenario_name/control.md" 2>/dev/null || true
-    fi
-  done
+  merge_control_results "$CONTROL_RUN" "$CANDIDATE_RUN"
 
   # Judge candidate
   echo "  → Judging candidate..."

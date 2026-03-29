@@ -8,6 +8,7 @@ Desktop.ini
 
 # Test results (generated output)
 tests/results/
+__pycache__/
 
 # GEB personal session state (per-user, not shared)
 .geb/.local/
