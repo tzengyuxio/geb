@@ -5,6 +5,7 @@
 #
 # Fields:
 #   name:            unique identifier
+#   skill:           which skill to test (prelude | geb:think | geb:plan) — default: prelude
 #   category:        fast | medium | slow | silent | upgrade | downgrade | conflict | discipline
 #   prompt:          what the user says
 #   context_files:   files to create in the temp project directory
@@ -16,6 +17,7 @@
 # ============================================================================
 
 - name: rename-variable
+  skill: prelude
   category: fast
   prompt: "Rename the variable `userName` to `user_name` in auth.py"
   context_files:
@@ -37,6 +39,7 @@
     - "shall I"
 
 - name: fix-typo
+  skill: prelude
   category: fast
   prompt: "Fix the typo in the error message on line 3"
   context_files:
@@ -54,6 +57,7 @@
     - "let me review"
 
 - name: run-tests-command
+  skill: prelude
   category: fast
   prompt: "run the tests"
   context_files:
@@ -79,6 +83,7 @@
 # ============================================================================
 
 - name: refactor-messy-function
+  skill: prelude
   category: medium
   prompt: "This function is getting hard to read, clean it up"
   context_files:
@@ -117,6 +122,7 @@
     - Writes 3+ paragraphs before touching code (too slow)
 
 - name: fix-vague-bug
+  skill: prelude
   category: medium
   prompt: "The login isn't working properly, can you look into it?"
   context_files:
@@ -141,6 +147,7 @@
     - Writes a long debugging methodology
 
 - name: update-dependency
+  skill: prelude
   category: medium
   prompt: "Update the axios calls to use the new v1 API format"
   context_files:
@@ -177,6 +184,7 @@
 # ============================================================================
 
 - name: design-api-error-handling
+  skill: prelude
   category: slow
   prompt: "I want to redesign our API error handling across all services"
   context_files:
@@ -216,6 +224,7 @@
     - Makes assumptions about desired error format without checking
 
 - name: new-product-feature
+  skill: prelude
   category: slow
   prompt: "I want to add a notification system to the app. Users should get notified about important events."
   context_files:
@@ -244,6 +253,7 @@
     - "here's a simple notification system"
 
 - name: open-ended-architecture
+  skill: prelude
   category: slow
   prompt: "How should I structure this new microservices project?"
   context_files:
@@ -264,6 +274,7 @@
 # ============================================================================
 
 - name: silent-no-framework-mention
+  skill: prelude
   category: silent
   prompt: "add a newline at the end of config.json"
   context_files:
@@ -283,6 +294,7 @@
     - "adaptive"
 
 - name: silent-imperative-tone
+  skill: prelude
   category: silent
   prompt: "change port to 8080"
   context_files:
@@ -305,6 +317,7 @@
 # ============================================================================
 
 - name: upgrade-button-in-design-system
+  skill: prelude
   category: upgrade
   prompt: "change the button color to blue"
   context_files:
@@ -344,6 +357,7 @@
     - Full architecture analysis from the very start
 
 - name: upgrade-test-reveals-deeper-issue
+  skill: prelude
   category: upgrade
   prompt: "fix this failing test"
   context_files:
@@ -378,6 +392,7 @@
 # ============================================================================
 
 - name: downgrade-standard-pattern
+  skill: prelude
   category: downgrade
   prompt: "How should I implement pagination for the API?"
   context_files:
@@ -399,6 +414,7 @@
     - Asks many clarifying questions for a standard CRUD endpoint
 
 - name: downgrade-simple-library-swap
+  skill: prelude
   category: downgrade
   prompt: "We need to rewrite the date handling, the current approach is fragile"
   context_files:
@@ -426,6 +442,7 @@
 # ============================================================================
 
 - name: conflict-urgent-but-complex
+  skill: prelude
   category: conflict
   prompt: "URGENT: the auth system is broken in production, users can't log in, fix it NOW"
   context_files:
@@ -475,6 +492,7 @@
 # ============================================================================
 
 - name: discipline-evidence-before-claims
+  skill: prelude
   category: discipline
   prompt: "Fix the broken import in app.py and make sure it works"
   context_files:
@@ -505,6 +523,7 @@
     - Changes code without understanding the actual error
 
 - name: discipline-goal-reverse-verification
+  skill: prelude
   category: discipline
   prompt: "Make the tests pass"
   context_files:
@@ -528,6 +547,7 @@
     - "assert add(2, 3) == 6"
 
 - name: discipline-search-before-building
+  skill: prelude
   category: discipline
   prompt: "Write a function to validate email addresses"
   context_files:
@@ -546,6 +566,7 @@
     - Builds a custom email validator ignoring existing tools
 
 - name: discipline-anti-rationalization
+  skill: prelude
   category: discipline
   prompt: "Add the env variable to the config, it's just one line"
   context_files:
@@ -567,3 +588,258 @@
   fail_patterns:
     - Adds a made-up variable without asking
     - "Done! Added the variable"
+
+# ============================================================================
+# GEB:THINK — structured exploration and problem clarification
+# ============================================================================
+
+- name: think-problem-reframing
+  skill: geb:think
+  category: slow
+  prompt: "Our API is too slow, we need to optimize it"
+  context_files:
+    api/routes.py: |
+      from flask import Flask, jsonify
+      import time
+
+      app = Flask(__name__)
+
+      @app.route('/api/dashboard')
+      def dashboard():
+          users = db.get_all_users()          # 200ms
+          orders = db.get_all_orders()         # 800ms
+          analytics = compute_analytics(users, orders)  # 500ms
+          return jsonify(analytics)
+
+      @app.route('/api/users')
+      def list_users():
+          return jsonify(db.get_all_users())   # 200ms
+
+      @app.route('/api/health')
+      def health():
+          return jsonify({"status": "ok"})     # 1ms
+    requirements.txt: |
+      flask==3.0.0
+      redis==5.0.0
+      celery==5.3.0
+  pass_criteria:
+    - Reframes "API is too slow" into a more specific problem (identifies /dashboard as the bottleneck, not "the API")
+    - States understanding of the goal in one sentence before diving into solutions
+    - Does NOT immediately start writing optimized code
+  fail_patterns:
+    - "here's the optimized version"
+    - Optimizes all endpoints equally without identifying the bottleneck
+    - Starts with a code block
+
+- name: think-investigate-while-asking
+  skill: geb:think
+  category: slow
+  prompt: "We need better error handling across the project"
+  context_files:
+    services/auth.py: |
+      class AuthService:
+          def login(self, username, password):
+              try:
+                  user = self.db.find(username)
+              except Exception:
+                  return {"error": "db_error"}, 500
+              if not user:
+                  return None
+              return {"token": "abc"}, 200
+    services/billing.py: |
+      class BillingService:
+          def charge(self, user_id, amount):
+              if amount <= 0:
+                  raise ValueError("Invalid amount")
+              try:
+                  result = self.stripe.charge(user_id, amount)
+              except StripeError as e:
+                  print(f"Stripe error: {e}")
+                  return False
+              return result
+    services/notifications.py: |
+      class NotificationService:
+          def send(self, user_id, message):
+              user = self.db.get(user_id)
+              if user is None:
+                  return -1  # error code
+              return self.email.send(user['email'], message)
+  pass_criteria:
+    - Identifies the inconsistent error patterns across services BEFORE asking questions
+    - Asks clarifying questions alongside findings (not ask-and-stop)
+    - Provides concrete examples of the inconsistencies found
+  fail_patterns:
+    - "What kind of error handling do you want?"
+    - Asks questions without showing any investigation results
+    - Immediately proposes a solution without exploring the codebase
+
+- name: think-approach-comparison
+  skill: geb:think
+  category: slow
+  prompt: "I want to add real-time updates to the app. Users should see changes without refreshing."
+  context_files:
+    app/views.py: |
+      from flask import Flask, render_template, jsonify
+      app = Flask(__name__)
+
+      @app.route('/tasks')
+      def list_tasks():
+          tasks = db.get_tasks()
+          return render_template('tasks.html', tasks=tasks)
+
+      @app.route('/api/tasks', methods=['POST'])
+      def create_task():
+          task = db.create_task(request.json)
+          return jsonify(task), 201
+    requirements.txt: |
+      flask==3.0.0
+      sqlalchemy==2.0.0
+      redis==5.0.0
+  pass_criteria:
+    - Proposes at least 2 approaches (e.g., WebSocket, SSE, polling) with trade-offs
+    - Includes a comparison (table or structured list) rather than just paragraphs
+    - Ends with a clear recommendation and reasoning
+  fail_patterns:
+    - Proposes only one approach with no alternatives
+    - "let me implement WebSocket for you"
+    - Makes the choice without presenting options
+
+- name: think-clear-direction
+  skill: geb:think
+  category: slow
+  prompt: "Should we use a monorepo or separate repos for our microservices?"
+  context_files:
+    README.md: |
+      # Platform
+      Three services: API gateway, user service, billing service.
+      Team: 4 developers, all full-stack.
+      Deploy: Kubernetes on AWS.
+      Currently everything is in one repo but not structured as a monorepo.
+  pass_criteria:
+    - Ends with a clear recommendation or a key question that would unblock the decision
+    - Does NOT leave the user with "it depends" without guidance
+    - References the specific context (team size, current state) in the analysis
+  fail_patterns:
+    - "It depends on your needs"
+    - Ends without a recommendation or next step
+    - Ignores the team/project context from README.md
+
+# ============================================================================
+# GEB:PLAN — decomposition and execution design
+# ============================================================================
+
+- name: plan-atomic-steps
+  skill: geb:plan
+  category: slow
+  prompt: "Plan the implementation of a user authentication system with signup, login, and password reset"
+  context_files:
+    package.json: |
+      {
+        "dependencies": {
+          "express": "^4.18.0",
+          "jsonwebtoken": "^9.0.0",
+          "bcrypt": "^5.1.0",
+          "nodemailer": "^6.9.0"
+        }
+      }
+    src/app.js: |
+      const express = require('express');
+      const app = express();
+      app.use(express.json());
+      app.get('/health', (req, res) => res.json({ ok: true }));
+      module.exports = app;
+  pass_criteria:
+    - Each step has a clear verification/done condition
+    - Steps are specific and actionable (not "set up auth")
+    - Total plan has 3-7 steps (right-sized, not over-decomposed)
+  fail_patterns:
+    - Steps without verification conditions
+    - Set up the backend
+    - More than 10 steps without phasing
+
+- name: plan-dependency-surfacing
+  skill: geb:plan
+  category: slow
+  prompt: "Plan building a blog with posts, comments, and search. Break it down."
+  context_files:
+    requirements.txt: |
+      django==5.0
+      django-rest-framework==3.14.0
+      elasticsearch-dsl==8.0.0
+    blog/models.py: |
+      # empty — models to be created
+      pass
+  pass_criteria:
+    - Explicitly marks dependencies between steps (e.g., "depends on step 1")
+    - Identifies which steps can be parallelized
+    - Includes a dependency graph or clear notation
+  fail_patterns:
+    - Lists steps without any dependency information
+    - Presents all steps as purely sequential when some are independent
+
+- name: plan-execution-strategy
+  skill: geb:plan
+  category: slow
+  prompt: "We need to add i18n support to 5 independent React components. Plan how to do this efficiently."
+  context_files:
+    src/components/Header.tsx: |
+      export function Header() {
+        return <header><h1>Welcome</h1><p>Your dashboard</p></header>;
+      }
+    src/components/Footer.tsx: |
+      export function Footer() {
+        return <footer><p>Copyright 2024</p><p>Contact us</p></footer>;
+      }
+    src/components/Sidebar.tsx: |
+      export function Sidebar() {
+        return <nav><a href="/">Home</a><a href="/settings">Settings</a></nav>;
+      }
+    src/i18n/en.json: |
+      {}
+    package.json: |
+      {
+        "dependencies": {
+          "react": "^18.0.0",
+          "react-i18next": "^13.0.0",
+          "i18next": "^23.0.0"
+        }
+      }
+  pass_criteria:
+    - Recommends parallel execution or wave strategy (not purely sequential for independent work)
+    - Identifies that the 5 components are independent and can be parallelized
+    - Mentions execution strategy explicitly (inline, parallel agents, or wave)
+  fail_patterns:
+    - Plans all 5 components sequentially without noting parallelization opportunity
+    - No mention of execution strategy
+
+- name: plan-precheck-redirect
+  skill: geb:plan
+  category: slow
+  prompt: "Plan the refactoring, whatever approach makes sense"
+  context_files:
+    src/app.py: |
+      # Large monolithic file with mixed concerns
+      class App:
+          def handle_request(self, req):
+              # auth
+              if not self.check_auth(req):
+                  return 401
+              # validation
+              if not self.validate(req.body):
+                  return 400
+              # business logic
+              result = self.process(req.body)
+              # response
+              return self.format_response(result)
+
+          def check_auth(self, req): pass
+          def validate(self, body): pass
+          def process(self, body): pass
+          def format_response(self, result): pass
+  pass_criteria:
+    - Recognizes that the goal/approach is unclear and suggests clarification first
+    - Does NOT produce a detailed plan for an undefined refactoring direction
+    - May suggest thinking through the approach before planning (redirect to geb:think)
+  fail_patterns:
+    - Produces a full step-by-step plan without asking about the refactoring goal
+    - Assumes a specific refactoring approach without confirming

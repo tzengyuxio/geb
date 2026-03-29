@@ -6,32 +6,41 @@
 # Outputs results to tests/results/<timestamp>/
 #
 # Usage:
-#   bash tests/run.sh                          # run all scenarios
-#   bash tests/run.sh --skill path/to/SKILL.md # test a specific SKILL.md
-#   bash tests/run.sh --scenario rename-variable # run one scenario
-#   bash tests/run.sh --control-only           # skip GEB runs, only control
-#   bash tests/run.sh --geb-only               # skip control runs
+#   bash tests/run.sh                            # run all scenarios (multi-skill)
+#   bash tests/run.sh --skill path/to/SKILL.md   # override: force one skill for all
+#   bash tests/run.sh --scenario rename-variable  # run one scenario
+#   bash tests/run.sh --filter-skill geb:think    # run only scenarios for a skill
+#   bash tests/run.sh --control-only              # skip GEB runs, only control
+#   bash tests/run.sh --geb-only                  # skip control runs
 #
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCENARIOS_FILE="$SCRIPT_DIR/scenarios.yml"
-SKILL_FILE="${SKILL_FILE:-$PROJECT_DIR/skills/prelude/SKILL.md}"
+SKILLS_DIR="$PROJECT_DIR/skills"
 MODEL="${MODEL:-sonnet}"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 RESULTS_DIR="$SCRIPT_DIR/results/$TIMESTAMP"
 ORIGINAL_DIR="$(pwd)"
 
+# Skill override: --skill flag or SKILL_FILE env var forces a single skill for all scenarios
+SKILL_OVERRIDE=""
+if [ -n "${SKILL_FILE:-}" ]; then
+  SKILL_OVERRIDE="$SKILL_FILE"
+fi
+
 # Parse args
 FILTER_SCENARIO=""
+FILTER_SKILL=""
 RUN_GEB=true
 RUN_CONTROL=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --skill) SKILL_FILE="$2"; shift 2 ;;
+    --skill) SKILL_OVERRIDE="$2"; shift 2 ;;
     --scenario) FILTER_SCENARIO="$2"; shift 2 ;;
+    --filter-skill) FILTER_SKILL="$2"; shift 2 ;;
     --control-only) RUN_GEB=false; shift ;;
     --geb-only) RUN_CONTROL=false; shift ;;
     --model) MODEL="$2"; shift 2 ;;
@@ -44,26 +53,55 @@ if [ ! -f "$SCENARIOS_FILE" ]; then
   exit 1
 fi
 
-if [ "$RUN_GEB" = true ] && [ ! -f "$SKILL_FILE" ]; then
-  echo "Error: SKILL.md not found: $SKILL_FILE"
+if [ -n "$SKILL_OVERRIDE" ] && [ "$RUN_GEB" = true ] && [ ! -f "$SKILL_OVERRIDE" ]; then
+  echo "Error: SKILL.md not found: $SKILL_OVERRIDE"
   exit 1
 fi
+
+# Resolve skill file for a given scenario skill name
+# Usage: resolve_skill_file <skill_name>
+# Returns the path to the SKILL.md file, or empty string if not found
+resolve_skill_file() {
+  local skill_name="$1"
+  local skill_file="$SKILLS_DIR/$skill_name/SKILL.md"
+  if [ -f "$skill_file" ]; then
+    echo "$skill_file"
+  else
+    echo ""
+  fi
+}
 
 mkdir -p "$RESULTS_DIR"
 
 # Save run metadata
-cat > "$RESULTS_DIR/meta.yml" <<EOF
+if [ -n "$SKILL_OVERRIDE" ]; then
+  cat > "$RESULTS_DIR/meta.yml" <<EOF
 timestamp: $TIMESTAMP
 model: $MODEL
-skill_file: $SKILL_FILE
-skill_hash: $(md5 -q "$SKILL_FILE" 2>/dev/null || md5sum "$SKILL_FILE" | cut -d' ' -f1)
+mode: override
+skill_file: $SKILL_OVERRIDE
+skill_hash: $(md5 -q "$SKILL_OVERRIDE" 2>/dev/null || md5sum "$SKILL_OVERRIDE" | cut -d' ' -f1)
 scenarios_file: $SCENARIOS_FILE
 filter: ${FILTER_SCENARIO:-all}
 EOF
+else
+  cat > "$RESULTS_DIR/meta.yml" <<EOF
+timestamp: $TIMESTAMP
+model: $MODEL
+mode: multi-skill
+skills_dir: $SKILLS_DIR
+scenarios_file: $SCENARIOS_FILE
+filter: ${FILTER_SCENARIO:-all}
+EOF
+fi
 
 echo "GEB Test Runner"
 echo "  Model:     $MODEL"
-echo "  Skill:     $SKILL_FILE"
+if [ -n "$SKILL_OVERRIDE" ]; then
+  echo "  Skill:     $SKILL_OVERRIDE (override)"
+else
+  echo "  Skills:    $SKILLS_DIR (per-scenario)"
+fi
 echo "  Results:   $RESULTS_DIR"
 echo ""
 
@@ -79,20 +117,13 @@ for s in scenarios:
 TOTAL=$(echo "$SCENARIO_NAMES" | wc -l | tr -d ' ')
 CURRENT=0
 
-SKILL_CONTENT=""
-if [ "$RUN_GEB" = true ]; then
-  SKILL_CONTENT=$(cat "$SKILL_FILE")
+# Pre-load skill content when using override mode
+OVERRIDE_SKILL_CONTENT=""
+if [ "$RUN_GEB" = true ] && [ -n "$SKILL_OVERRIDE" ]; then
+  OVERRIDE_SKILL_CONTENT=$(cat "$SKILL_OVERRIDE")
 fi
 
 for SCENARIO_NAME in $SCENARIO_NAMES; do
-  # Apply filter
-  if [ -n "$FILTER_SCENARIO" ] && [ "$SCENARIO_NAME" != "$FILTER_SCENARIO" ]; then
-    continue
-  fi
-
-  CURRENT=$((CURRENT + 1))
-  echo "[$CURRENT/$TOTAL] $SCENARIO_NAME"
-
   # Extract scenario data with Python
   SCENARIO_DATA=$(python3 -c "
 import yaml, json, sys
@@ -105,13 +136,46 @@ for s in scenarios:
 ")
 
   PROMPT=$(echo "$SCENARIO_DATA" | python3 -c "import json,sys; print(json.load(sys.stdin)['prompt'])")
+  SCENARIO_SKILL=$(echo "$SCENARIO_DATA" | python3 -c "import json,sys; print(json.load(sys.stdin).get('skill', 'prelude'))")
+
+  # Apply filters
+  if [ -n "$FILTER_SCENARIO" ] && [ "$SCENARIO_NAME" != "$FILTER_SCENARIO" ]; then
+    continue
+  fi
+  if [ -n "$FILTER_SKILL" ] && [ "$SCENARIO_SKILL" != "$FILTER_SKILL" ]; then
+    continue
+  fi
+
+  # Resolve the skill file for this scenario
+  if [ -n "$SKILL_OVERRIDE" ]; then
+    SCENARIO_SKILL_FILE="$SKILL_OVERRIDE"
+  else
+    SCENARIO_SKILL_FILE=$(resolve_skill_file "$SCENARIO_SKILL")
+  fi
+
+  echo "[$CURRENT/$TOTAL] $SCENARIO_NAME (skill: $SCENARIO_SKILL)"
+
+  # Load per-scenario skill content when in multi-skill mode
+  SKILL_CONTENT=""
+  if [ "$RUN_GEB" = true ]; then
+    if [ -n "$SKILL_OVERRIDE" ]; then
+      SKILL_CONTENT="$OVERRIDE_SKILL_CONTENT"
+    elif [ -n "$SCENARIO_SKILL_FILE" ]; then
+      SKILL_CONTENT=$(cat "$SCENARIO_SKILL_FILE")
+    else
+      echo "  ⚠ Warning: skill file not found for '$SCENARIO_SKILL', skipping GEB run"
+    fi
+  fi
+
   SCENARIO_DIR="$RESULTS_DIR/$SCENARIO_NAME"
   mkdir -p "$SCENARIO_DIR"
 
-  # Save scenario metadata
+  # Save scenario metadata (includes skill field)
   echo "$SCENARIO_DATA" | python3 -c "
 import json, sys
 s = json.load(sys.stdin)
+print(f\"skill: {s.get('skill', 'prelude')}\")
+print(f\"skill_file: $SCENARIO_SKILL_FILE\")
 print(f\"category: {s['category']}\")
 print(f\"prompt: {s['prompt']}\")
 print('pass_criteria:')
@@ -135,8 +199,8 @@ for path, content in s.get('context_files', {}).items():
 "
 
   # Run WITH GEB (cd to temp dir so Claude sees the files)
-  if [ "$RUN_GEB" = true ]; then
-    echo "  → with GEB..."
+  if [ "$RUN_GEB" = true ] && [ -n "$SKILL_CONTENT" ]; then
+    echo "  → with GEB ($SCENARIO_SKILL)..."
     (cd "$TEMP_DIR" && claude -p "$PROMPT" \
       --disable-slash-commands \
       --append-system-prompt "$SKILL_CONTENT" \

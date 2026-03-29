@@ -1,8 +1,18 @@
 You are evaluating whether a Claude Code skill ("GEB") improves Claude's behavior on a specific scenario.
 
+## Skill Behavior Reference
+
+| Skill | Behavior |
+|-------|----------|
+| prelude | Adaptive depth routing — matches thinking depth to task complexity (fast/medium/slow) |
+| geb:think | Structured exploration — problem definition, research, approach comparison, clear direction |
+| geb:plan | Decomposition & execution design — atomic steps, dependency surfacing, execution strategy |
+
 ## Scenario
 
 - **Name**: {{name}}
+- **Skill**: {{skill}}
+- **Skill behavior**: (see reference table above)
 - **Category**: {{category}}
 - **Expected depth**: {{category}} (fast = execute silently, medium = brief confirmation then proceed, slow = structured thinking with clarifying questions)
 - **Prompt**: "{{prompt}}"

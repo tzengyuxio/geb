@@ -30,6 +30,29 @@ COMPARISON_WEIGHTS = {
     "WORSE": 0.0,
 }
 
+DEFAULT_SKILL = "prelude"
+
+
+def load_skill_map(scores_path: Path) -> dict:
+    """Build a name->skill map from tests/scenarios.yml for fallback lookup."""
+    skill_map = {}
+    # scenarios.yml lives in tests/ — same dir as score.py
+    # scores_path is tests/results/<ts>/scores.yml, so .parent.parent.parent = tests/
+    scenarios_yml = scores_path.parent.parent.parent / "scenarios.yml"
+    if not scenarios_yml.exists():
+        # Fallback: relative to the script itself
+        scenarios_yml = Path(__file__).parent / "scenarios.yml"
+    if scenarios_yml.exists():
+        with open(scenarios_yml) as f:
+            scenarios = yaml.safe_load(f)
+        if isinstance(scenarios, list):
+            for s in scenarios:
+                name = s.get("name", "")
+                skill = s.get("skill", DEFAULT_SKILL)
+                if name:
+                    skill_map[name] = skill
+    return skill_map
+
 
 def parse_judge_output(raw: str) -> dict:
     """Extract structured data from judge YAML output."""
@@ -133,12 +156,17 @@ def main():
         print("No scenarios found in scores file")
         sys.exit(1)
 
+    # Build skill lookup for fallback when skill is missing from scores.yml entries
+    skill_map = load_skill_map(scores_path)
+
     results = []
     category_scores = {}
+    skill_scores = {}
 
     for scenario in scenarios:
         name = scenario.get("name", "unknown")
         category = scenario.get("category", "unknown")
+        skill = scenario.get("skill") or skill_map.get(name, DEFAULT_SKILL)
         judge_raw = scenario.get("judge_output", "")
 
         parsed = parse_judge_output(judge_raw)
@@ -147,6 +175,7 @@ def main():
         results.append({
             "name": name,
             "category": category,
+            "skill": skill,
             "score": score,
             "comparison": parsed["comparison"],
             "pass_rate": parsed["pass_rate"],
@@ -158,6 +187,10 @@ def main():
         if category not in category_scores:
             category_scores[category] = []
         category_scores[category].append(score)
+
+        if skill not in skill_scores:
+            skill_scores[skill] = []
+        skill_scores[skill].append(score)
 
     # Aggregate
     all_scores = [r["score"] for r in results]
@@ -176,11 +209,18 @@ def main():
         for cat, scores in category_scores.items()
     }
 
+    # Skill averages
+    skill_averages = {
+        sk: round(sum(scores) / len(scores), 4)
+        for sk, scores in skill_scores.items()
+    }
+
     summary = {
         "aggregate_score": aggregate,
         "total_scenarios": len(results),
         "regressions": regressions,
         "category_scores": category_averages,
+        "skill_scores": skill_averages,
         "scenarios": results,
     }
 
@@ -200,6 +240,14 @@ def main():
             print(f"    {cat:12s}  {bar}  {avg:.4f}")
         print()
 
+        # Compute max skill name length for alignment
+        max_skill_len = max((len(sk) for sk in skill_averages), default=12)
+        print(f"  Skill Scores:")
+        for sk, avg in sorted(skill_averages.items()):
+            bar = "█" * int(avg * 20) + "░" * (20 - int(avg * 20))
+            print(f"    {sk:{max_skill_len}s}  {bar}  {avg:.4f}")
+        print()
+
         if regressions:
             print(f"  ⚠ Regressions:")
             for r in regressions:
@@ -209,7 +257,8 @@ def main():
         print(f"  Per-Scenario Detail:")
         for r in results:
             status = "✓" if r["comparison"] == "BETTER" else ("✗" if r["comparison"] == "WORSE" else "~")
-            print(f"    {status} {r['name']:40s}  {r['score']:.4f}  ({r['comparison']}, {r['criteria_passed']}/{r['criteria_total']} criteria)")
+            skill_tag = f"[{r['skill']}]"
+            print(f"    {status} {r['name']:40s}  {skill_tag:14s}  {r['score']:.4f}  ({r['comparison']}, {r['criteria_passed']}/{r['criteria_total']} criteria)")
         print()
 
     # Write summary to results dir

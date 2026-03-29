@@ -69,6 +69,7 @@ for SCENARIO_DIR in $SCENARIO_DIRS; do
 
   # Extract fields from scenario.yml
   CATEGORY=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); print([l.split(': ',1)[1].strip() for l in lines if l.startswith('category:')][0])")
+  SKILL=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); matches=[l.split(': ',1)[1].strip() for l in lines if l.startswith('skill:')]; print(matches[0] if matches else 'prelude')")
   PROMPT=$(echo "$SCENARIO_META" | python3 -c "import sys; lines=sys.stdin.readlines(); print([l.split(': ',1)[1].strip() for l in lines if l.startswith('prompt:')][0])")
 
   PASS_CRITERIA=$(echo "$SCENARIO_META" | python3 -c "
@@ -119,6 +120,7 @@ scenario = open('$SCENARIO_DIR/scenario.yml').read()
 import re
 category = ''
 prompt_text = ''
+skill = 'prelude'
 pass_criteria = ''
 fail_patterns = ''
 
@@ -127,6 +129,8 @@ for line in scenario.split('\n'):
         category = line.split(': ', 1)[1].strip()
     elif line.startswith('prompt:'):
         prompt_text = line.split(': ', 1)[1].strip()
+    elif line.startswith('skill:'):
+        skill = line.split(': ', 1)[1].strip()
 
 in_pass = False
 in_fail = False
@@ -144,6 +148,7 @@ for line in scenario.split('\n'):
 
 result = template
 result = result.replace('{{name}}', '$SCENARIO_NAME')
+result = result.replace('{{skill}}', skill)
 result = result.replace('{{category}}', category)
 result = result.replace('{{prompt}}', prompt_text)
 result = result.replace('{{pass_criteria}}', pass_criteria.strip())
@@ -168,6 +173,7 @@ print(result)
   # Append to aggregate scores
   echo "" >> "$SCORES_FILE"
   echo "  - name: $SCENARIO_NAME" >> "$SCORES_FILE"
+  echo "    skill: $SKILL" >> "$SCORES_FILE"
   echo "    category: $CATEGORY" >> "$SCORES_FILE"
   echo "    judge_output: |" >> "$SCORES_FILE"
   echo "$JUDGE_OUTPUT" | sed 's/^/      /' >> "$SCORES_FILE"

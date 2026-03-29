@@ -10,7 +10,8 @@
 #   5. Repeating until convergence
 #
 # Usage:
-#   bash scripts/improve.sh
+#   bash scripts/improve.sh                        # improve prelude (default)
+#   bash scripts/improve.sh --target geb:think     # improve a specific skill
 #   bash scripts/improve.sh --max-rounds 10
 #   bash scripts/improve.sh --stall-limit 5
 #   bash scripts/improve.sh --baseline tests/results/20260328-180332
@@ -21,7 +22,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TESTS_DIR="$PROJECT_DIR/tests"
-SKILL_FILE="$PROJECT_DIR/skills/prelude/SKILL.md"
+TARGET_SKILL="${TARGET_SKILL:-prelude}"
 IMPROVE_TEMPLATE="$TESTS_DIR/improve-prompt.md"
 
 # Defaults
@@ -48,10 +49,18 @@ while [[ $# -gt 0 ]]; do
     --judge-model) JUDGE_MODEL="$2"; shift 2 ;;
     --improve-model) IMPROVE_MODEL="$2"; shift 2 ;;
     --baseline) EXISTING_BASELINE="$2"; shift 2 ;;
+    --target) TARGET_SKILL="$2"; shift 2 ;;
     --dry-run) DRY_RUN=true; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
+
+# Resolve skill file path from target name
+SKILL_FILE="$PROJECT_DIR/skills/$TARGET_SKILL/SKILL.md"
+if [ ! -f "$SKILL_FILE" ]; then
+  echo "Error: SKILL.md not found for target '$TARGET_SKILL': $SKILL_FILE"
+  exit 1
+fi
 
 # Session workspace
 SESSION_ID=$(date +%Y%m%d-%H%M%S)
@@ -66,6 +75,8 @@ echo "║  Stall limit:    $STALL_LIMIT"
 echo "║  Runner model:   $RUNNER_MODEL"
 echo "║  Judge model:    $JUDGE_MODEL"
 echo "║  Improver model: $IMPROVE_MODEL"
+echo "║  Target skill:   $TARGET_SKILL"
+echo "║  Skill file:     $SKILL_FILE"
 echo "║  Workspace:      $WORKSPACE"
 echo "╚════════════════════════════════════════════════════╝"
 echo ""
@@ -136,9 +147,9 @@ if [ -n "$EXISTING_BASELINE" ]; then
 else
   echo "═══ Baseline Run ═══"
 
-  echo "Running GEB scenarios..."
-  env MODEL="$RUNNER_MODEL" SKILL_FILE="$WORKSPACE/current-SKILL.md" \
-    bash "$TESTS_DIR/run.sh" --geb-only 2>&1 | tail -5
+  echo "Running GEB scenarios for $TARGET_SKILL..."
+  env MODEL="$RUNNER_MODEL" \
+    bash "$TESTS_DIR/run.sh" --skill "$WORKSPACE/current-SKILL.md" --filter-skill "$TARGET_SKILL" --geb-only 2>&1 | tail -5
 
   LATEST_RUN=$(find_latest_run)
   if [ -z "$LATEST_RUN" ]; then
@@ -146,9 +157,9 @@ else
     exit 1
   fi
 
-  echo "Running control scenarios..."
+  echo "Running control scenarios for $TARGET_SKILL..."
   env MODEL="$RUNNER_MODEL" \
-    bash "$TESTS_DIR/run.sh" --control-only 2>&1 | tail -5
+    bash "$TESTS_DIR/run.sh" --filter-skill "$TARGET_SKILL" --control-only 2>&1 | tail -5
   CONTROL_RUN=$(find_latest_run)
 
   # Merge control results into GEB run
@@ -259,8 +270,8 @@ for ROUND in $(seq 1 "$MAX_ROUNDS"); do
 
   # Test candidate
   echo "  → Testing candidate..."
-  env MODEL="$RUNNER_MODEL" SKILL_FILE="$WORKSPACE/candidate-SKILL.md" \
-    bash "$TESTS_DIR/run.sh" --geb-only 2>&1 | tail -3
+  env MODEL="$RUNNER_MODEL" \
+    bash "$TESTS_DIR/run.sh" --skill "$WORKSPACE/candidate-SKILL.md" --filter-skill "$TARGET_SKILL" --geb-only 2>&1 | tail -3
 
   CANDIDATE_RUN=$(find_latest_run)
 
