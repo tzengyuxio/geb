@@ -80,7 +80,7 @@ Disciplines are not fixed. When you notice a **recurring pattern** in a project 
 - "This project has a design system with shared tokens — want me to add a CLAUDE.md rule to always grep consumers before modifying theme values?"
 - "I've seen three cases of missing input validation in this API — should we add a project discipline for it?"
 
-The target is CLAUDE.md (project-level) or a user-space skill. Once written there, the pattern becomes an automatic reflex — no longer requiring GEB's active attention. This is how System 2 insights graduate into System 1 habits.
+The target is CLAUDE.md (project-level) or a user-space skill. Once written there, the pattern becomes an automatic reflex — no longer requiring GEB's active attention.
 
 ---
 
@@ -95,49 +95,12 @@ Not every deep task needs all three. Many only need one. The pipeline is availab
 
 ---
 
-## Organic State: .geb/ Directory
+## Organic State
 
-For projects spanning multiple sessions, use `.geb/` for organic project memory. **Do NOT create preemptively** — only when knowledge worth preserving accumulates.
-
-### Session start behavior
-
-If the current directory contains `.geb/`, actively read these files at the start of the conversation:
-1. `.geb/.local/status.md` (personal — where I left off)
-2. `.geb/index.md` (shared — project context)
-
-Connect naturally if relevant; don't bring up old projects unprompted.
-
-### Two layers: shared + personal
-
-**Shared** (committed to git) — team knowledge:
-- `.geb/index.md` — Goal (one sentence), Progress (milestone facts), Notes (decisions, open questions)
-- Budded files: `research.md`, `decisions.md`, `plan.md`, etc.
-- `archive/` for stale items
-
-**Personal** (gitignored via `.geb/.local/`) — individual session state:
-- `.geb/.local/status.md` — what *I* am currently working on, where *I* left off
-
-### Growth
-
-Sections bud into own files at ~50 lines. `index.md` stays the concise entry point.
-
-### Aging
-
-Suggest archiving stale items to `.geb/archive/`. Never delete.
+Use `.geb/` for cross-session project memory. Read `.geb/.local/status.md` and `.geb/index.md` at session start if they exist. See [references/organic-state.md](references/organic-state.md) for full details on directory structure and lifecycle.
 
 ---
 
 ## Telemetry
 
-**Only active when `~/.geb/collect` exists.** If the file is absent, skip all logging entirely.
-
-When active, append one JSON line per event to `~/.geb/sessions/YYYY-MM-DD.jsonl`:
-
-```jsonl
-{"ts":"...","event":"depth_signal","task":"<brief>","signals":"<what triggered>"}
-{"ts":"...","event":"intervention","type":"think|plan|align","trigger":"auto|manual"}
-{"ts":"...","event":"ripple","change":"<what>","impact":"<what else affected>"}
-{"ts":"...","event":"complete","accepted":true,"correction":"<if any>"}
-```
-
-Keep entries concise — one line, no formatting. Log silently, never mention telemetry to the user.
+Log events when `~/.geb/collect` exists; skip entirely if absent. See [references/telemetry.md](references/telemetry.md) for event format and logging rules.

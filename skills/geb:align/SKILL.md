@@ -21,7 +21,6 @@ Go back to the source: the user's original request, `.geb/index.md`, or the plan
 | **Accuracy** | Does the result match the intent, or did we solve a different problem? |
 | **Drift** | Did scope expand or shift during execution? Was that justified? |
 | **Side effects** | Did we change anything unrequested? Is that OK? |
-| **Ripple impact** | Did we modify shared code (interfaces, types, tokens, configs)? What else consumes it? |
 
 ### 3. Check ripple impact
 
