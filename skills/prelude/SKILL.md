@@ -119,3 +119,22 @@ Suggest archiving stale items to `.geb/archive/`. Never delete.
 ### Multi-user note
 
 When multiple team members use GEB on the same repo, shared `.geb/` files may be edited concurrently. Merge conflicts on Markdown are typically straightforward — resolve like any other source file. No special tooling required.
+
+---
+
+## Telemetry
+
+**Only active when `~/.geb/collect` exists.** If the file is absent, skip all logging entirely.
+
+When active, append one JSON line per event to `~/.geb/sessions/YYYY-MM-DD.jsonl`:
+
+```jsonl
+{"ts":"...","event":"depth_routing","task":"<brief summary>","depth":"fast|medium|slow","signals":"<why>"}
+{"ts":"...","event":"override","from":"slow","to":"fast","trigger":"<user message summary>"}
+{"ts":"...","event":"skill","name":"geb:think","trigger":"auto|manual"}
+{"ts":"...","event":"upgrade","from":"fast","to":"medium","reason":"<what was discovered>"}
+{"ts":"...","event":"downgrade","from":"slow","to":"fast","reason":"<known pattern identified>"}
+{"ts":"...","event":"complete","accepted":true,"correction":"<if any>"}
+```
+
+Keep entries concise — one line, no formatting. Log silently, never mention telemetry to the user.
