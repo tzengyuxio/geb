@@ -114,7 +114,16 @@ cd geb
 bash install.sh
 ```
 
-This symlinks the `prelude` skill to `~/.claude/skills/prelude/`. Start a new Claude Code session to activate.
+This installs 4 skills and a session-start hook:
+
+| Skill | What it does |
+|-------|-------------|
+| `prelude` | Auto-loaded every session. Depth routing, organic state, silent rule. |
+| `/geb:think` | Structured exploration for complex tasks. |
+| `/geb:plan` | Decompose approach into executable steps with orchestration. |
+| `/geb:align` | Verify results against original goals. |
+
+Prelude loads automatically via a SessionStart hook. The other three skills are invoked on demand — either manually or auto-triggered by Claude when your task matches their description.
 
 ## Uninstall
 
@@ -122,12 +131,68 @@ This symlinks the `prelude` skill to `~/.claude/skills/prelude/`. Start a new Cl
 bash uninstall.sh
 ```
 
+## Telemetry & Self-Improvement
+
+GEB includes a built-in feedback loop: collect real usage data, analyze patterns, and iteratively improve the skills.
+
+### Enable telemetry
+
+```bash
+touch ~/.geb/collect    # enable
+rm ~/.geb/collect       # disable
+```
+
+When enabled, GEB silently logs events to `~/.geb/sessions/YYYY-MM-DD.jsonl` — depth routing decisions, user overrides, skill invocations, dynamic routing events, and task outcomes. No data is sent anywhere; everything stays on your machine.
+
+### Analyze your data
+
+```bash
+python3 scripts/analyze.py              # full report
+python3 scripts/analyze.py --days 7     # last 7 days
+python3 scripts/analyze.py --json       # machine-readable
+```
+
+The report shows: depth distribution, override rate (how often you disagree with routing), skill auto-trigger rate, and user corrections — all signals that point to where the skills need tuning.
+
+### Improve the skills
+
+Feed your telemetry into the autoresearch-style improvement loop:
+
+```bash
+# Generate feedback from your usage data
+python3 scripts/analyze.py --feed-improve > ~/.geb/feedback.log
+
+# Run the improvement loop (modifies SKILL.md, tests, keeps or discards)
+bash scripts/improve.sh --target prelude
+bash scripts/improve.sh --target geb:think
+```
+
+Each round: propose one change → test against scenarios → score → keep if improved, discard if not.
+
+### Contributing telemetry to the project
+
+If you'd like to submit a PR with improvement proposals informed by your telemetry data, please anonymize your logs first:
+
+```bash
+python3 scripts/anonymize.py ~/.geb/sessions/   # outputs to ~/.geb/sessions-anon/
+```
+
+This strips:
+- File paths and directory names (replaced with generic tokens)
+- Task descriptions and user messages (replaced with category labels)
+- Timestamps (shifted to relative offsets)
+- Project-specific terms (names, URLs, identifiers)
+
+What's preserved: event types, depth values, skill names, override patterns, and correction categories — the structural signals needed for improvement without any personal or project context.
+
+**Never commit raw `~/.geb/sessions/` files** — they contain task descriptions that may reference proprietary code or private information.
+
 ## Roadmap
 
 GEB follows a self-bootstrapping strategy — each version is built using the previous one. If the framework isn't good enough to improve itself, it's not ready.
 
-- **v0** (current) — Minimal core: adaptive depth routing, thinking flow, organic state, universal disciplines
-- **v1** — Engineering infrastructure: context management, subagent orchestration, full state system with aging
+- **v0** — Minimal core: adaptive depth routing, thinking flow, organic state, universal disciplines
+- **v1** (current) — Engineering infrastructure: context management, subagent orchestration, multi-skill architecture
 - **v2** — Context modules: pluggable execution roles, ad-hoc role creation, self-learning system
 
 ## License
