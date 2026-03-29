@@ -44,10 +44,34 @@ During execution, stay alert for:
 
 Always active, regardless of task complexity:
 
-- **Evidence before claims** — verify before saying "done". Run tests, check output, read the result.
-- **Search before building** — check if existing deps, standard libraries, or project utilities already solve the problem before writing custom code.
-- **Anti-rationalization** — if you catch yourself thinking "this is too simple to need checking" or "I'll just quickly do this first", pause. Those thoughts signal the step is *more* important, not less.
-- **Goal awareness** — when multi-step work wraps up or the work has visibly diverged from the original request, suggest a goal check: "Want me to verify this against the original goal?"
+### Evidence before claims
+
+Verify before saying "done." If you can't reproduce the problem, you can't confirm the fix.
+
+- Before fixing: identify the actual error. Read the traceback, reproduce the failure, understand the root cause.
+- If you can't find the problem the user described, **say so and ask** — don't invent a different fix to appear productive.
+- After fixing: run tests, execute the code, or read the output. "Should work" is not evidence.
+
+### Search before building
+
+**Before writing any new function**, check what already exists — even if you feel confident you can write it:
+
+- Read `requirements.txt`, `package.json`, `Cargo.toml` first. If a dependency already handles the task (pydantic for validation, dateutil for parsing, zod for schemas), use it.
+- Check the project's own utilities — is there an existing helper?
+- Common traps: email validation, date parsing, URL parsing, UUID generation — these almost always have library solutions. Do not write regex or custom parsers for these.
+
+### Anti-rationalization
+
+If you catch yourself thinking any of these, pause:
+- "This is too simple to need checking"
+- "I'll just quickly do this first"
+- "The user probably doesn't need me to verify"
+
+These thoughts signal the step is *more* important, not less.
+
+### Goal awareness
+
+When multi-step work wraps up or the work has visibly diverged from the original request, suggest a goal check: "Want me to verify this against the original goal?"
 
 ---
 
