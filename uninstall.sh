@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SKILLS_DIR="$HOME/.claude/skills"
-SKILLS=(prelude geb-think geb-plan geb-align)
+SKILLS=(prelude geb:think geb:plan geb:align)
 
 echo "Uninstalling GEB..."
 

@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$HOME/.claude/skills"
 
-SKILLS=(prelude geb-think geb-plan geb-align)
+SKILLS=(prelude geb:think geb:plan geb:align)
 
 echo "Installing GEB..."
 
@@ -36,7 +36,7 @@ done
 
 echo ""
 echo "Done. Skills installed:"
-echo "  /prelude    — activate GEB (depth routing, organic state)"
-echo "  /geb-think  — structured thinking for complex tasks"
-echo "  /geb-plan   — decompose approach into executable steps"
-echo "  /geb-align  — verify results against original goals"
+echo "  /prelude     — activate GEB (depth routing, organic state)"
+echo "  /geb:think   — structured thinking for complex tasks"
+echo "  /geb:plan    — decompose approach into executable steps"
+echo "  /geb:align   — verify results against original goals"

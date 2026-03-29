@@ -1,5 +1,5 @@
 ---
-name: geb-align
+name: geb:align
 description: Verify results against original goals — use at completion checkpoints, after finishing a task or milestone, or when direction feels uncertain. Triggers on "are we on track", "check the goal", "did we miss anything", or when a phase wraps up.
 ---
 
@@ -35,9 +35,9 @@ Be direct:
 
 Based on findings:
 - **Aligned** → done, or proceed to next phase
-- **Gap found** → suggest addressing it, or re-enter `/geb-plan` for remaining work
+- **Gap found** → suggest addressing it, or re-enter `/geb:plan` for remaining work
 - **Drift detected** → confirm new direction with user before continuing
-- **Needs rethinking** → suggest `/geb-think` to reassess approach
+- **Needs rethinking** → suggest `/geb:think` to reassess approach
 
 ## Update State
 

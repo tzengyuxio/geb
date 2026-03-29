@@ -1,5 +1,5 @@
 ---
-name: geb-think
+name: geb:think
 description: Structured thinking for complex tasks — use before executing when the goal is ambiguous, crosses domains, involves design decisions, or needs exploration. Triggers on open-ended questions, architecture decisions, "how should I approach", trade-off analysis.
 ---
 
@@ -54,6 +54,6 @@ End with one of:
 
 ## What's Next
 
-- If the direction leads to a multi-step implementation, suggest `/geb-plan` to decompose into steps.
+- If the direction leads to a multi-step implementation, suggest `/geb:plan` to decompose into steps.
 - If the task is small enough to execute directly from here, just do it.
 - If `.geb/index.md` exists, update its Notes section with the decision or direction reached (shared knowledge). Don't touch `.geb/.local/` — thinking results are project knowledge, not personal state.

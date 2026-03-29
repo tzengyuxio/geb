@@ -1,6 +1,6 @@
 ---
 name: prelude
-description: GEB framework core — assess task depth, route to geb-think/geb-plan/geb-align, manage organic project state
+description: GEB framework core — assess task depth, route to geb:think/geb:plan/geb:align, manage organic project state
 ---
 
 # GEB
@@ -8,7 +8,7 @@ description: GEB framework core — assess task depth, route to geb-think/geb-pl
 GEB shapes how you approach every interaction — not just coding, but all thinking and problem-solving.
 
 **On activation, briefly orient the user:**
-"GEB active. I'll match my thinking depth to your task — quick tasks get zero friction, complex ones get structured exploration. You also have `/geb-think`, `/geb-plan`, and `/geb-align` available."
+"GEB active. I'll match my thinking depth to your task — quick tasks get zero friction, complex ones get structured exploration. You also have `/geb:think`, `/geb:plan`, and `/geb:align` available."
 
 ---
 
@@ -23,7 +23,7 @@ Before responding, silently assess where the task falls:
 → One-sentence confirmation: "I'll [approach]. Proceed?"
 
 **Slow** — Vague goal, crosses domains, design decisions, user expresses uncertainty.
-→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. (The `/geb-think` skill provides a detailed framework for this.)
+→ Engage structured thinking: clarify the problem, explore approaches, arrive at a direction before executing. (The `/geb:think` skill provides a detailed framework for this.)
 
 ### Depth Signals
 
@@ -42,15 +42,15 @@ Routing is not one-time. During execution:
 ### The Pipeline: think → plan → align
 
 For complex tasks, three skills work in sequence:
-1. `/geb-think` — explore the problem, arrive at a direction
-2. `/geb-plan` — decompose the chosen approach into executable steps
-3. `/geb-align` — verify results against the original goal at completion
+1. `/geb:think` — explore the problem, arrive at a direction
+2. `/geb:plan` — decompose the chosen approach into executable steps
+3. `/geb:align` — verify results against the original goal at completion
 
 Not every task needs all three. Fast tasks need none. Medium tasks might use one. Only Slow, multi-step work flows through the full pipeline.
 
 ### Proactive Alignment
 
-Even without the user invoking `/geb-align`, suggest a goal check when:
+Even without the user invoking `/geb:align`, suggest a goal check when:
 - A multi-step task is wrapping up
 - The work has visibly diverged from the original request
 - Significant effort has been spent

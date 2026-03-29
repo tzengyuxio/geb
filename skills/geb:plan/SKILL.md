@@ -1,5 +1,5 @@
 ---
-name: geb-plan
+name: geb:plan
 description: Decompose a decided approach into executable steps — use after thinking through an approach, when ready to implement a multi-step task. Triggers on "plan this", "break this down", "what are the steps", or when a task clearly needs sequenced execution.
 ---
 
@@ -9,7 +9,7 @@ The direction is clear. Break it into executable steps.
 
 ## Pre-check
 
-This skill works best when the goal and approach are already decided. If either is unclear, suggest `/geb-think` first rather than planning around ambiguity.
+This skill works best when the goal and approach are already decided. If either is unclear, suggest `/geb:think` first rather than planning around ambiguity.
 
 ## Decomposition Rules
 
