@@ -125,6 +125,14 @@ This installs 4 skills and a session-start hook:
 
 Prelude loads automatically via a SessionStart hook. The other three skills are invoked on demand — either manually or auto-triggered by Claude when your task matches their description.
 
+### Optional: enable usage collection
+
+```bash
+touch ~/.geb/collect
+```
+
+This enables local-only telemetry — GEB will silently log depth routing decisions, skill invocations, and user overrides to `~/.geb/sessions/`. **Nothing is uploaded or sent anywhere.** The data stays on your machine and can be used to improve your local GEB skills over time. See [Telemetry & Self-Improvement](#telemetry--self-improvement) for details.
+
 ## Uninstall
 
 ```bash
