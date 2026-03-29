@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$HOME/.claude/skills"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
-SKILLS=(prelude geb:think geb:plan geb:align)
+SKILLS=(prelude geb:think geb:plan geb:align geb:groove)
 HOOK_COMMAND="bash ~/.claude/skills/prelude/session-start"
 
 echo "Installing GEB..."
@@ -94,7 +94,8 @@ echo ""
 echo "Done. GEB will activate automatically on every new session."
 echo ""
 echo "Skills available:"
-echo "  /prelude     — depth routing, organic state (auto-loaded)"
+echo "  /prelude     — depth guard, disciplines, organic state (auto-loaded)"
 echo "  /geb:think   — structured thinking for complex tasks"
 echo "  /geb:plan    — decompose approach into executable steps"
 echo "  /geb:align   — verify results against original goals"
+echo "  /geb:groove  — review and apply discipline proposals"

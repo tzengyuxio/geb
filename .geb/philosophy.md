@@ -61,11 +61,22 @@ This maps to GEB's organic/self-bootstrapping philosophy:
 
 ```
 Observation (System 2)
-    → Proposed habit (bridge)
-        → CLAUDE.md / user skill (System 1 reflex)
+    → Proposed habit (.geb/proposals/)
+        → User approval (geb:groove)
+            → CLAUDE.md / user skill (System 1 reflex)
 ```
 
 This is the cognitive equivalent of GEB's "organic growth" and "self-bootstrapping" principles: the framework learns from its own operation, converting expensive System 2 insights into cheap System 1 reflexes. Over time, the user's environment becomes increasingly tuned — not because GEB controls more behavior, but because discovered patterns graduate into automated defaults.
+
+### v2 Implementation: The Discipline Pipeline
+
+The evolution mechanism is now concrete infrastructure, not just a concept:
+
+- **Detection**: Prelude watches for recurring patterns (3+ occurrences with telemetry, 2+ within a session)
+- **Proposal**: Writes structured proposals to `.geb/proposals/` with evidence, proposed rule, and target
+- **Review**: `/geb:groove` lets the user list, preview, approve, or reject proposals
+- **Graduation**: Approved proposals become CLAUDE.md rules (simple patterns) or user skills (complex patterns)
+- **Guard rails**: Never auto-apply; conservative trigger thresholds to avoid proposal spam
 
 ## What GEB Does NOT Do
 

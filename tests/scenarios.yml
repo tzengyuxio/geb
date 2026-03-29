@@ -5,8 +5,8 @@
 #
 # Fields:
 #   name:            unique identifier
-#   skill:           which skill to test (prelude | geb:think | geb:plan) — default: prelude
-#   category:        depth-signal | upgrade | discipline | conflict
+#   skill:           which skill to test (prelude | geb:think | geb:plan | geb:groove) — default: prelude
+#   category:        depth-signal | upgrade | discipline | conflict | evolution
 #   prompt:          what the user says
 #   context_files:   files to create in the temp project directory
 #   pass_criteria:   what the response SHOULD do (list)
@@ -672,3 +672,76 @@
   fail_patterns:
     - Produces a full step-by-step plan without asking about the refactoring goal
     - Assumes a specific refactoring approach without confirming
+
+# ============================================================================
+# EVOLUTION — discipline pipeline: pattern detection and proposal creation
+# ============================================================================
+
+- name: evolution-detect-repeated-pattern
+  skill: prelude
+  category: evolution
+  prompt: "I just fixed the third API endpoint this week that was missing input validation. The pattern keeps repeating."
+  context_files:
+    src/routes/orders.py: |
+      @app.post('/orders')
+      def create_order():
+          data = request.json
+          # no validation — just trusts the input
+          return db.insert_order(data)
+    src/routes/users.py: |
+      @app.put('/users/<id>')
+      def update_user(id):
+          data = request.json
+          # no validation
+          return db.update_user(id, data)
+    .geb/index.md: |
+      # Project State
+      ## Goal
+      Build REST API for task management app.
+  pass_criteria:
+    - Recognizes this as a recurring pattern worth codifying
+    - Suggests creating a discipline proposal or offers to write one
+    - Does NOT just fix the current file without addressing the systemic issue
+  fail_patterns:
+    - Only adds validation to the shown files without mentioning the recurring pattern
+    - Ignores the user's observation about repetition
+
+- name: evolution-no-false-positive
+  skill: prelude
+  category: evolution
+  prompt: "Fix the typo in the error message"
+  context_files:
+    server.py: |
+      def start():
+          print("Starting server...")
+          raise RuntimeError("Faild to connect to database")
+          return True
+  pass_criteria:
+    - Fixes the typo directly without suggesting a discipline proposal
+    - Does not over-analyze a simple one-off fix
+  fail_patterns:
+    - Suggests creating a discipline proposal for a one-off typo
+    - Writes to .geb/proposals/
+
+- name: evolution-propose-with-evidence
+  skill: prelude
+  category: evolution
+  prompt: "Every time I modify a theme token, something breaks in another component. This is the fourth time. Can you help prevent this?"
+  context_files:
+    src/theme.ts: |
+      export const theme = {
+        colors: { primary: '#3B82F6', secondary: '#6B7280' },
+        spacing: { sm: '4px', md: '8px', lg: '16px' },
+      };
+      // Used by: Button, Card, Header, Sidebar, Badge, Alert, Modal, Nav
+    .geb/index.md: |
+      # Project State
+      ## Goal
+      Dashboard app with design system.
+  pass_criteria:
+    - Creates or offers to create a discipline proposal
+    - The proposal includes concrete evidence (the user said fourth time)
+    - Proposes a specific preventive rule (e.g., grep consumers before modifying tokens)
+  fail_patterns:
+    - Only fixes the current issue without addressing the systemic problem
+    - Suggests a vague improvement without a concrete rule

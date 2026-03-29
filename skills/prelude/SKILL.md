@@ -75,23 +75,25 @@ When multi-step work wraps up or the work has visibly diverged from the original
 
 ### Discipline evolution
 
-Disciplines are not fixed. When you notice a **recurring pattern** in a project that keeps causing issues or requiring manual attention, suggest codifying it:
+Disciplines grow from use. When you notice a **recurring pattern** causing issues (same mistake 2+ times in a session, or 3+ times across sessions with telemetry), create a proposal:
 
-- "This project has a design system with shared tokens — want me to add a CLAUDE.md rule to always grep consumers before modifying theme values?"
-- "I've seen three cases of missing input validation in this API — should we add a project discipline for it?"
+1. Write a proposal to `.geb/proposals/{pattern-name}.md` — see [references/proposals.md](references/proposals.md) for format and trigger conditions
+2. Tell the user: "I've noticed [pattern]. Created a discipline proposal in `.geb/proposals/`. Run `/geb:groove` to review."
 
-The target is CLAUDE.md (project-level) or a user-space skill. Once written there, the pattern becomes an automatic reflex — no longer requiring GEB's active attention.
+Do NOT auto-apply proposals. The user decides via `/geb:groove`.
 
 ---
 
-## The Pipeline: think → plan → align
+## Available Skills
 
-For tasks that need depth, three skills work in sequence:
-1. `/geb:think` — explore the problem, arrive at a direction
-2. `/geb:plan` — decompose into steps + decide execution strategy
-3. `/geb:align` — verify results against the original goal at completion
+| Skill | Purpose |
+|-------|---------|
+| `/geb:think` | Structured exploration — clarify the problem, compare approaches, arrive at a direction |
+| `/geb:plan` | Decompose into executable steps with orchestration strategy |
+| `/geb:align` | Verify results against the original goal, check ripple impact |
+| `/geb:groove` | Review and apply discipline proposals generated from usage patterns |
 
-Not every deep task needs all three. Many only need one. The pipeline is available, not mandatory.
+For deep tasks, skills chain naturally: think → plan → align. Not every task needs all of them.
 
 ---
 
