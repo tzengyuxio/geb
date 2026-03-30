@@ -5,7 +5,7 @@ description: Review and apply discipline proposals — use when GEB has detected
 
 # GEB Groove — Discipline Pipeline
 
-Review, approve, or reject discipline proposals that GEB generated from observed usage patterns.
+Review, approve, or reject discipline proposals that GEB generated from observed usage patterns. Proposals are Markdown files in `.geb/proposals/` — see prelude's [references/proposals.md](../prelude/references/proposals.md) for format details.
 
 ## Workflow
 
@@ -41,24 +41,18 @@ Then ask: "Approve, reject, or edit?"
 
 **Approve** (target: skill):
 
-Check if `skill-creator` is available (look for the skill in the current skill list). Then follow one of two paths:
+Check if `skill-creator` is available in the current skill list.
 
 **With skill-creator** (preferred):
-1. Invoke `/example-skills:skill-creator` (or `/skill-creator` if installed standalone) with the following context:
-   - Mode: Create
-   - Skill name: derived from the proposal filename
-   - Description: the proposal's `pattern` field
-   - Behavior: the proposal's `Proposed Rule` section
-   - Evidence: pass the `Evidence` section as example use cases
-2. Let skill-creator handle SKILL.md generation, validation, and packaging
-3. Move the proposal to `.geb/proposals/.approved/`
+1. Invoke skill-creator in Create mode, passing: skill name (from filename), description (from `pattern` field), behavior (from `Proposed Rule`), examples (from `Evidence`)
+2. Move the proposal to `.geb/proposals/.approved/`
 
 **Without skill-creator** (fallback):
 1. Create the skill directory in the project (ask for location if unclear)
-2. Write SKILL.md with:
-   - `name`: derived from proposal filename
-   - `description`: the proposal's `pattern` field + trigger contexts
-   - Body: convert the `Proposed Rule` into imperative instructions; add `Evidence` examples as reference
+2. Write SKILL.md:
+   - `name`: from proposal filename
+   - `description`: the `pattern` field + trigger contexts (when should this skill activate?)
+   - Body: convert `Proposed Rule` into imperative instructions; use `Evidence` as concrete examples. Write in imperative form ("Validate all fields" not "You should validate").
 3. Move the proposal to `.geb/proposals/.approved/`
 4. Confirm: "Created skill at [path]. Install with `ln -s` or add to install.sh."
 
