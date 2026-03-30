@@ -56,6 +56,14 @@ Based on findings:
 - **Drift detected** → confirm new direction with user before continuing
 - **Needs rethinking** → suggest `/geb:think` to reassess approach
 
+## When to use align vs review
+
+- **"Are we building the right thing?"** → `/geb:align` (this skill)
+- **"Is what we built good enough?"** → `/geb:review` (includes a lightweight goal check)
+- **Both at once** → just run `/geb:review` — it starts with a goal check before auditing quality
+
+Use align on its own for **milestone checkpoints** where direction matters more than code quality — e.g., after phase 1 of a multi-phase project, before committing to the next phase.
+
 ## Update State
 
 If `.geb/index.md` exists:

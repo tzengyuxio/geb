@@ -7,9 +7,16 @@ description: Multi-dimensional quality review of completed work — use after fi
 
 Work is done. Check if it's good enough to ship.
 
-This is different from `/geb:align` (did we build the right thing?) — review asks **did we build it well?**
+## Quick Goal Check
 
-## Dimensions
+Before diving into quality, glance at the original goal: **are we still on track?** If the work has drifted from the original request, flag it now — no point auditing quality on something that solves the wrong problem.
+
+- If aligned → proceed to quality dimensions below
+- If drifted → surface the drift first, then ask whether to continue the review or re-align via `/geb:align`
+
+This is a lightweight check, not a full alignment audit. For deep goal verification on milestones, use `/geb:align` directly.
+
+## Quality Dimensions
 
 Check each dimension. Skip any that clearly don't apply.
 
@@ -78,6 +85,6 @@ If everything is clean: "Reviewed [X]. No issues found. Ready to ship."
 
 ## When NOT to use this skill
 
-- You're checking goal alignment, not quality → use `/geb:align`
+- You only need a direction/goal checkpoint, not quality audit → use `/geb:align`
 - Something is broken and you need to find the cause → use `/geb:debug`
 - You're exploring approaches before implementation → use `/geb:think`
