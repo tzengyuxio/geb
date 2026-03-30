@@ -15,8 +15,8 @@ Build an adaptive thinking framework for Claude Code that intervenes when depth 
 - [x] Pattern detection workflow in prelude SKILL.md
 - [x] `geb:groove` skill built (list/approve/reject proposals)
 - [x] 3 evolution test scenarios added (detect, no-false-positive, propose-with-evidence)
-- [ ] Baseline test run with new scenarios
-- [ ] Phase C: skill generator (proposals → full skills when complexity exceeds a single rule)
+- [x] Baseline test run (20260330-032327): prelude 0.7067, evolution 2/3 pass
+- [x] Phase C: skill generator — groove detects skill-creator and delegates, or generates directly as fallback
 
 ## Notes
 

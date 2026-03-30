@@ -87,6 +87,19 @@ How:
 
 Do NOT auto-apply proposals. The user decides via `/geb:groove`.
 
+### Miss reporting
+
+When the user indicates GEB should have intervened but didn't — e.g., "you should have warned me about that", "GEB should have caught this", "why didn't you flag the ripple impact?" — log a miss event:
+
+If `~/.geb/collect` exists, append to the daily telemetry log:
+```jsonl
+{"ts":"...","event":"miss","context":"<what the user said GEB should have caught>"}
+```
+
+Then acknowledge: "Noted — I'll watch for this pattern going forward."
+
+Miss events are high-value signals for improving GEB's depth detection.
+
 ---
 
 ## Available Skills

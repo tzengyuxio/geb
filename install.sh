@@ -7,6 +7,7 @@ SETTINGS_FILE="$HOME/.claude/settings.json"
 
 SKILLS=(prelude geb:think geb:plan geb:align geb:groove)
 HOOK_COMMAND="bash ~/.claude/skills/prelude/session-start"
+TELEMETRY_HOOK="bash ~/.claude/skills/prelude/hooks/telemetry.sh"
 
 echo "Installing GEB..."
 
@@ -89,6 +90,36 @@ with open('$SETTINGS_FILE', 'w') as f:
 "
   echo "  Hook: created $SETTINGS_FILE"
 fi
+
+# ── Install telemetry hook (PostToolUse) ──
+
+python3 -c "
+import json
+with open('$SETTINGS_FILE') as f:
+    s = json.load(f)
+if 'hooks' not in s:
+    s['hooks'] = {}
+# Check if telemetry hook already exists
+existing = s.get('hooks', {}).get('PostToolUse', [])
+already = any('telemetry.sh' in hk.get('command', '')
+              for entry in existing for hk in entry.get('hooks', []))
+if not already:
+    if 'PostToolUse' not in s['hooks']:
+        s['hooks']['PostToolUse'] = []
+    s['hooks']['PostToolUse'].append({
+        'matcher': '',
+        'hooks': [{
+            'type': 'command',
+            'command': '$TELEMETRY_HOOK',
+            'async': True
+        }]
+    })
+    with open('$SETTINGS_FILE', 'w') as f:
+        json.dump(s, f, indent=4)
+    print('  Telemetry hook: added (async)')
+else:
+    print('  Telemetry hook: already configured')
+" 2>/dev/null
 
 echo ""
 echo "Done. GEB will activate automatically on every new session."
