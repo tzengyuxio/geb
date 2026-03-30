@@ -114,16 +114,17 @@ cd geb
 bash install.sh
 ```
 
-This installs 4 skills and a session-start hook:
+This installs 5 skills and a session-start hook:
 
 | Skill | What it does |
 |-------|-------------|
-| `prelude` | Auto-loaded every session. Depth routing, organic state, silent rule. |
+| `prelude` | Auto-loaded every session. Depth guard, disciplines, organic state. |
 | `/geb:think` | Structured exploration for complex tasks. |
 | `/geb:plan` | Decompose approach into executable steps with orchestration. |
-| `/geb:align` | Verify results against original goals. |
+| `/geb:align` | Verify results against original goals, check ripple impact. |
+| `/geb:groove` | Review and apply discipline proposals generated from usage patterns. |
 
-Prelude loads automatically via a SessionStart hook. The other three skills are invoked on demand — either manually or auto-triggered by Claude when your task matches their description.
+Prelude loads automatically via a SessionStart hook. The other skills are invoked on demand — either manually or auto-triggered by Claude when your task matches their description.
 
 ### Optional: enable usage collection
 
@@ -200,8 +201,8 @@ What's preserved: event types, depth values, skill names, override patterns, and
 GEB follows a self-bootstrapping strategy — each version is built using the previous one. If the framework isn't good enough to improve itself, it's not ready.
 
 - **v0** — Minimal core: adaptive depth routing, thinking flow, organic state, universal disciplines
-- **v1** (current) — Engineering infrastructure: context management, subagent orchestration, multi-skill architecture
-- **v2** — Context modules: pluggable execution roles, ad-hoc role creation, self-learning system
+- **v1** — Depth guard architecture, multi-skill test infrastructure, self-improvement loop
+- **v2** (current) — Discipline pipeline (`geb:groove`): pattern detection → proposals → graduation to automated habits. Next: skill generator for complex patterns.
 
 ## License
 

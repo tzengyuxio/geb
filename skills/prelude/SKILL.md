@@ -75,9 +75,14 @@ When multi-step work wraps up or the work has visibly diverged from the original
 
 ### Discipline evolution
 
-Disciplines grow from use. When you notice a **recurring pattern** causing issues (same mistake 2+ times in a session, or 3+ times across sessions with telemetry), create a proposal:
+Disciplines grow from use. Create a proposal when:
 
-1. Write a proposal to `.geb/proposals/{pattern-name}.md` — see [references/proposals.md](references/proposals.md) for format and trigger conditions
+- You observe the **same pattern causing issues 2+ times** in a session
+- The user **explicitly tells you** a pattern keeps recurring ("this keeps happening", "third time this week", "every time I do X")
+- Telemetry shows 3+ occurrences across sessions
+
+How:
+1. Write a proposal to `.geb/proposals/{pattern-name}.md` — see [references/proposals.md](references/proposals.md) for format
 2. Tell the user: "I've noticed [pattern]. Created a discipline proposal in `.geb/proposals/`. Run `/geb:groove` to review."
 
 Do NOT auto-apply proposals. The user decides via `/geb:groove`.

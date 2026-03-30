@@ -9,16 +9,24 @@ The direction is clear. Break it into executable steps and decide how to execute
 
 ## Pre-check
 
-This skill works best when the goal and approach are already decided. If either is unclear, suggest `/geb:think` first rather than planning around ambiguity.
+Before planning, assess: **is the goal specific enough to decompose?**
+
+- "Implement auth with signup, login, and password reset" → **goal is clear** — plan it.
+- "Refactor this, whatever approach makes sense" → **approach is undefined** — suggest `/geb:think` first.
+- "Make this better" → **goal is vague** — ask what "better" means, or suggest `/geb:think`.
+
+The test: can you write a one-sentence Goal for the plan? If not, the direction isn't decided yet.
 
 ## Decomposition Rules
 
 ### Keep steps atomic and verifiable
 
-Each step should do one thing with a clear "done" condition.
+Each step must have a **verify** condition — a concrete way to confirm it's done.
 
 Bad: "Set up the backend"
 Good: "Create the Express app with health check endpoint. Verify: `curl localhost:3000/health` returns 200."
+
+Every step in the output MUST include `— verify: [...]`. No exceptions.
 
 ### Surface dependencies
 
@@ -39,10 +47,6 @@ Mark which steps depend on others. Independent steps can be parallelized.
 - Steps should be roughly similar effort — if one is 10x larger, break it down
 
 ## Execution Strategy
-
-After decomposing steps, decide how to execute them:
-
-### Execution strategy
 
 | Situation | Strategy |
 |-----------|----------|
