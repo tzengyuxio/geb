@@ -40,8 +40,25 @@ Then ask: "Approve, reject, or edit?"
 4. Confirm: "Added to CLAUDE.md. This will take effect next session."
 
 **Approve** (target: skill):
-1. Create the skill directory in the project's preferred location (ask if unclear)
-2. Write SKILL.md with frontmatter + the proposed behavior
+
+Check if `skill-creator` is available (look for the skill in the current skill list). Then follow one of two paths:
+
+**With skill-creator** (preferred):
+1. Invoke `/example-skills:skill-creator` (or `/skill-creator` if installed standalone) with the following context:
+   - Mode: Create
+   - Skill name: derived from the proposal filename
+   - Description: the proposal's `pattern` field
+   - Behavior: the proposal's `Proposed Rule` section
+   - Evidence: pass the `Evidence` section as example use cases
+2. Let skill-creator handle SKILL.md generation, validation, and packaging
+3. Move the proposal to `.geb/proposals/.approved/`
+
+**Without skill-creator** (fallback):
+1. Create the skill directory in the project (ask for location if unclear)
+2. Write SKILL.md with:
+   - `name`: derived from proposal filename
+   - `description`: the proposal's `pattern` field + trigger contexts
+   - Body: convert the `Proposed Rule` into imperative instructions; add `Evidence` examples as reference
 3. Move the proposal to `.geb/proposals/.approved/`
 4. Confirm: "Created skill at [path]. Install with `ln -s` or add to install.sh."
 

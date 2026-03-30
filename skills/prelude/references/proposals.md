@@ -56,3 +56,18 @@ Do NOT create proposals for:
 - General best practices Claude already knows
 - One-off issues unlikely to recur
 - Patterns already covered by GEB's built-in disciplines
+
+## Target Selection
+
+When creating a proposal, set `target` based on complexity:
+
+**target: CLAUDE.md** when:
+- The rule fits in 1-3 lines
+- No examples or checklists needed
+- Simple "always do X before Y" pattern
+
+**target: skill** when:
+- The rule needs examples, checklists, or step-by-step procedures
+- Multiple trigger contexts exist (not just one situation)
+- References to project files or patterns would be helpful
+- The rule is complex enough that a one-liner would be too vague to follow
