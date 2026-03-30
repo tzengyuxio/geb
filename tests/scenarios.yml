@@ -5,8 +5,8 @@
 #
 # Fields:
 #   name:            unique identifier
-#   skill:           which skill to test (prelude | geb:think | geb:plan | geb:groove) — default: prelude
-#   category:        depth-signal | upgrade | discipline | conflict | evolution
+#   skill:           which skill to test (prelude | geb:think | geb:plan | geb:debug | geb:review | geb:groove) — default: prelude
+#   category:        depth-signal | upgrade | discipline | conflict | evolution | diagnosis | quality
 #   prompt:          what the user says
 #   context_files:   files to create in the temp project directory
 #   pass_criteria:   what the response SHOULD do (list)
@@ -421,6 +421,143 @@
   fail_patterns:
     - Adds a made-up variable without asking
     - "Done! Added the variable"
+
+# ============================================================================
+# GEB:DEBUG — systematic diagnosis
+# ============================================================================
+
+- name: debug-root-cause-first
+  skill: geb:debug
+  category: diagnosis
+  prompt: "This test is failing, fix it"
+  context_files:
+    tests/test_auth.py: |
+      def test_login():
+          user = create_user("alice", "secret123")
+          result = login("alice", "secret123")
+          assert result["token"] is not None  # FAILS: result is None
+    auth.py: |
+      import hashlib
+
+      def create_user(username, password):
+          hashed = hashlib.sha256(password.encode()).hexdigest()
+          db.insert({"username": username, "hash": hashed})
+
+      def login(username, password):
+          user = db.find(username)
+          if not user:
+              return None
+          if hashlib.md5(password.encode()).hexdigest() != user["hash"]:
+              return None
+          return {"token": generate_token(user)}
+  pass_criteria:
+    - Identifies the root cause (md5 vs sha256 mismatch) before proposing a fix
+    - Does NOT just change the test assertion to match current behavior
+    - States the root cause explicitly
+  fail_patterns:
+    - Changes the test to assert result is None
+    - Fixes without stating what was wrong
+
+- name: debug-reproduce-before-guess
+  skill: geb:debug
+  category: diagnosis
+  prompt: "The API is returning wrong data sometimes, not sure when"
+  context_files:
+    api.py: |
+      from flask import Flask, jsonify, request
+      import json
+
+      app = Flask(__name__)
+      cache = {}
+
+      @app.route('/api/user/<user_id>')
+      def get_user(user_id):
+          if user_id in cache:
+              return jsonify(cache[user_id])
+          user = db.find(user_id)
+          cache[user_id] = user
+          return jsonify(user)
+
+      @app.route('/api/user/<user_id>', methods=['PUT'])
+      def update_user(user_id):
+          data = request.json
+          db.update(user_id, data)
+          return jsonify({"ok": True})
+  pass_criteria:
+    - Asks for or identifies specific reproduction steps (when does "sometimes" happen?)
+    - Identifies the cache invalidation issue (PUT updates db but not cache)
+    - Does NOT blindly add a fix without understanding the pattern
+  fail_patterns:
+    - Immediately adds cache clearing without explaining why
+    - Ignores the "sometimes" qualifier and treats it as a constant bug
+
+# ============================================================================
+# GEB:REVIEW — multi-dimensional quality audit
+# ============================================================================
+
+- name: review-multi-dimensional
+  skill: geb:review
+  category: quality
+  prompt: "I just finished the user settings page. Review it before I ship."
+  context_files:
+    src/routes/settings.py: |
+      from flask import request, jsonify
+
+      @app.route('/api/settings', methods=['GET'])
+      def get_settings():
+          user = get_current_user()
+          return jsonify(user.settings)
+
+      @app.route('/api/settings', methods=['PUT'])
+      def update_settings():
+          data = request.json
+          user = get_current_user()
+          user.settings = data
+          db.save(user)
+          return jsonify({"ok": True})
+    src/components/Settings.tsx: |
+      export function Settings() {
+        const [settings, setSettings] = useState({});
+        useEffect(() => { fetch('/api/settings').then(r => r.json()).then(setSettings) }, []);
+        const save = () => fetch('/api/settings', { method: 'PUT', body: JSON.stringify(settings) });
+        return <form onSubmit={save}><input value={settings.name} onChange={e => setSettings({...settings, name: e.target.value})} /><button>Save</button></form>;
+      }
+  pass_criteria:
+    - Checks multiple dimensions (not just code style) — e.g., input validation, error handling, security
+    - Identifies at least one concrete issue (missing input validation on PUT, no error handling on fetch, no CSRF protection, etc.)
+    - Provides a clear verdict (ready/needs fixes)
+  fail_patterns:
+    - Only comments on code style or formatting
+    - Says "looks good" without checking for issues
+
+- name: review-not-just-code
+  skill: geb:review
+  category: quality
+  prompt: "Review this API design doc before I share it with the team"
+  context_files:
+    docs/api-design.md: |
+      # Task API Design
+
+      ## Endpoints
+      - GET /tasks — list all tasks
+      - POST /tasks — create task
+      - GET /tasks/:id — get task
+      - PUT /tasks/:id — update task
+      - DELETE /tasks/:id — delete task
+
+      ## Auth
+      All endpoints require Bearer token.
+
+      ## Response Format
+      All responses return JSON with `data` field.
+      Errors return `{error: "message"}`.
+  pass_criteria:
+    - Reviews the document content (API design quality), not just formatting
+    - Identifies gaps (missing pagination, no rate limiting, no versioning, no error codes, etc.)
+    - Treats this as a design review, not a code review
+  fail_patterns:
+    - Only comments on markdown formatting
+    - Treats it as code to implement rather than a design to review
 
 # ============================================================================
 # GEB:THINK — structured exploration and problem clarification

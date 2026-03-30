@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$HOME/.claude/skills"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
-SKILLS=(prelude geb:think geb:plan geb:align geb:groove)
+SKILLS=(prelude geb:think geb:plan geb:align geb:debug geb:review geb:groove)
 HOOK_COMMAND="bash ~/.claude/skills/prelude/session-start"
 TELEMETRY_HOOK="bash ~/.claude/skills/prelude/hooks/telemetry.sh"
 
@@ -129,4 +129,6 @@ echo "  /prelude     — depth guard, disciplines, organic state (auto-loaded)"
 echo "  /geb:think   — structured thinking for complex tasks"
 echo "  /geb:plan    — decompose approach into executable steps"
 echo "  /geb:align   — verify results against original goals"
+echo "  /geb:debug   — systematic diagnosis for anything broken"
+echo "  /geb:review  — multi-dimensional quality audit"
 echo "  /geb:groove  — review and apply discipline proposals"

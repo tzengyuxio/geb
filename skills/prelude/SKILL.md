@@ -109,9 +109,11 @@ Miss events are high-value signals for improving GEB's depth detection.
 | `/geb:think` | Structured exploration — clarify the problem, compare approaches, arrive at a direction |
 | `/geb:plan` | Decompose into executable steps with orchestration strategy |
 | `/geb:align` | Verify results against the original goal, check ripple impact |
+| `/geb:debug` | Systematic diagnosis — symptoms → reproduce → isolate → root cause → fix |
+| `/geb:review` | Multi-dimensional quality audit — correctness, consistency, ripple, security, completeness |
 | `/geb:groove` | Review and apply discipline proposals generated from usage patterns |
 
-For deep tasks, skills chain naturally: think → plan → align. Not every task needs all of them.
+For deep tasks, skills chain naturally: think → plan → (execute) → review → align. Debug when something breaks.
 
 ---
 
