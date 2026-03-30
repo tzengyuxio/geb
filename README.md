@@ -8,76 +8,85 @@
 
 ## The Problem
 
-Claude Code treats every task the same way. Ask it to rename a variable, and it writes three paragraphs of analysis first. Ask it to design a system architecture, and it jumps straight to code without thinking through the trade-offs.
+An LLM has one autoregressive process reading one set of instructions. It doesn't have two cognitive systems. Trying to make it behave as both "fast and intuitive" and "slow and deliberate" through a single prompt creates an irresolvable contradiction — strengthening one mode degrades the other.
 
-Most AI coding tools optimize for **code output** — more code, faster code, better code. But the real bottleneck in AI-assisted work isn't code generation. It's **knowing when to think and when to act**.
+Most AI coding frameworks try to control *all* of Claude's behavior. GEB takes a different approach: **Claude's defaults are already good. GEB only adds what's missing.**
 
 ## What GEB Does
 
-GEB reshapes how Claude Code thinks. Instead of treating every task with the same approach, it teaches Claude to **match its thinking depth to your task's complexity** — automatically.
+Claude already handles simple tasks well — renaming a variable, fixing a typo, running tests. It doesn't need a framework to tell it how to do these things.
 
-- **Simple request?** Execute immediately. No preamble, no confirmation, no friction.
-- **Moderate ambiguity?** One-sentence check-in, then proceed.
-- **Complex problem?** Structured thinking: define the problem, research, design approaches, decide, then act.
+What Claude lacks is **System 2** — the deliberate, structured thinking that kicks in for complex problems: exploring trade-offs, decomposing multi-step plans, verifying goals, and learning from patterns.
 
-The depth isn't a binary switch — it's a **continuous dial**. Claude suggests; you override with natural language anytime. And it dynamically adjusts mid-task as complexity reveals itself.
+**GEB provides this second circuit.** It stays silent on simple tasks and intervenes only when depth is needed.
 
 ## What Makes GEB Different
-
-GEB is not just a coding tool. It's a system for **thinking and problem-solving**, where code is one of many possible outputs.
 
 | Approach | What it optimizes for |
 |----------|----------------------|
 | Prompt rules in CLAUDE.md | Static behavior — same rules, every time |
 | Code-focused frameworks | Code quality — discipline, testing, review |
 | Project management frameworks | Reliability — context persistence, task tracking |
-| **GEB** | **Thinking quality — right depth, right time** |
+| **GEB** | **Thinking quality — the right cognitive tools at the right time** |
 
 A task using GEB might produce code, a decision record, a research note, a workflow design, or a reframed problem statement. The framework treats all of these as equally valid outcomes.
 
 ## Philosophy
 
-> *Like rain that nourishes silently* — invisible in daily use, surfacing at the right moments with the right depth.
+> Claude's default behavior is System 1 — intuitive, automatic, general-purpose.
+> GEB is System 2 — deliberate, effortful, activated on demand.
 
-GEB is designed like a good co-pilot: you don't notice it most of the time, but it speaks up when it matters.
+GEB is a **depth guard**: it watches for signals that a task needs more thinking than surface-level execution, and intervenes when it detects them. For everything else, it stays out of the way.
 
-**Silent by default.** It only surfaces for:
-- Depth adjustment — "This is more involved than expected. Want me to step back and think through the approach?"
-- Goal awareness — "We started with X, but this is heading toward Y. Still right?"
-- Session continuity — "Last time we were working on X. Continue from there?"
-- State management — "This section has grown. Split into its own file?"
+You don't notice GEB on simple tasks. That's by design — not because of a "silent rule" that suppresses the framework, but because **the framework genuinely has nothing to add**. The absence of intervention is not a mode; it's the natural state.
 
-No commands to learn. No special syntax. "Just do it", "think about this", "analyze carefully" — everyday language is the control mechanism.
+GEB speaks up when it matters:
+- "This crosses three services with inconsistent patterns. Want me to explore approaches?"
+- "Done. Note: this also affects 8 components that share the same theme token."
+- "I've noticed this validation issue three times now. Created a discipline proposal."
 
 ## How It Works
 
-### Adaptive Depth
+### Depth Guard
 
-Inspired by Kahneman's *Thinking, Fast and Slow*:
+Prelude — the always-on core — watches for signals during every task:
 
-| Depth | Signals | Claude does |
-|-------|---------|-------------|
-| **Fast** | Clear, small, imperative tone | Execute silently. Zero friction. |
-| **Medium** | Some ambiguity, moderate scope | One-sentence confirmation, then proceed |
-| **Slow** | Vague goal, cross-domain, design decisions | Structured thinking pipeline |
+- **Open-ended goals** — "redesign", "how should I", "what's the best way"
+- **Cross-domain scope** — touches multiple systems, modules, or layers
+- **Design decisions** — meaningful alternatives exist with different trade-offs
+- **Hidden complexity** — what started simple reveals deeper issues
 
-Depth isn't locked at the start. If a "fast" task reveals unexpected complexity, Claude suggests upgrading. If a "slow" assessment turns out to be a known pattern, it simplifies. You can override at any point.
+When signals are detected, GEB engages the appropriate cognitive tool. When signals are absent, Claude's defaults handle the task with zero overhead.
 
-### Thinking Core
+### Cognitive Tools
 
-When depth calls for it, GEB engages structured thinking — not every step every time, but as needed:
+| Skill | When it activates | What it does |
+|-------|------------------|--------------|
+| `/geb:think` | Ambiguous goals, trade-off analysis | Structured exploration: problem definition → approach comparison → clear direction |
+| `/geb:plan` | Multi-step implementation | Decompose into atomic steps with verify conditions, dependency graphs, execution strategy |
+| `/geb:align` | Task completion, drift suspected | Goal verification: completeness, accuracy, drift, ripple impact |
+| `/geb:groove` | Recurring patterns noticed | Discipline pipeline: create proposals → user reviews → graduate to automated habits |
 
-1. **Problem definition** — continuous, not one-time. What are you *really* trying to solve? Refines as understanding grows.
-2. **Research & exploration** — what already exists? What can we learn from prior art?
-3. **Approach design** — 2-3 paths with trade-offs and a recommendation.
-4. **Decision & planning** — lock direction, decompose into steps.
-5. **Action** — execute directly, or alternate between thinking and doing.
+These chain naturally for deep tasks: think → plan → align. Most tasks need only one, or none.
 
-The output is whatever best captures the current understanding — a question, a plan, a decision record, or nothing at all. Form follows need.
+### Disciplines
+
+Always-on guardrails that don't require conscious engagement:
+
+- **Evidence before claims** — verify before saying "done"; "should work" is not evidence
+- **Search before building** — check existing deps and project utilities before writing custom code
+- **Anti-rationalization** — "this is too simple to check" means it's important enough to check
+- **Goal awareness** — suggest alignment checks when multi-step work wraps up
+
+### Discipline Evolution (Groove)
+
+Disciplines are not fixed. GEB watches for recurring patterns — the same mistake happening repeatedly, the same type of issue surfacing across tasks. When it detects one, it creates a **proposal** in `.geb/proposals/`.
+
+You review proposals via `/geb:groove`. Approved proposals become CLAUDE.md rules or project-specific skills — graduating from active System 2 attention into automatic System 1 reflexes. Like water carving a groove in stone: repeated flow creates a permanent channel.
 
 ### Organic State
 
-Project memory that grows like a living tree — not "build an empty house and move in", but "settle on land and grow the space you need":
+Project memory that grows like a living tree:
 
 ```
 Stage 0: .geb/index.md                    ← everything in one file
@@ -87,24 +96,9 @@ Stage 2: .geb/index.md + research/ + ...  ← continued growth
 
 - No preset structure — form follows content
 - `index.md` is always the entry point for any new session
-- Content ages gracefully: old items fold into archives, never deleted
 - All Markdown — human-readable, git-friendly
 
-**Multi-user friendly.** State is split into two layers:
-
-- **Shared** (`.geb/`, committed) — project goals, milestone progress, design decisions, research. Team knowledge that benefits everyone.
-- **Personal** (`.geb/.local/`, gitignored) — session continuity, current work status. Only you need this.
-
-Multiple team members can each use GEB on the same repo. Shared files merge like any Markdown; personal state never conflicts.
-
-### Universal Disciplines
-
-Brief checkpoints applied at all depths — not lengthy processes, but silent guardrails:
-
-1. **Evidence before claims** — verify before saying "done"
-2. **Anti-rationalization** — catch "this is too simple to need checking" thoughts
-3. **Goal-reverse verification** — did we achieve the *goal*, or just complete the *task list*?
-4. **Search before building** — check if it exists before creating from scratch
+**Multi-user friendly.** State is split into shared (`.geb/`, committed) and personal (`.geb/.local/`, gitignored). Multiple team members can each use GEB on the same repo without conflicts.
 
 ## Install
 
