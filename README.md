@@ -63,13 +63,12 @@ When signals are detected, GEB engages the appropriate cognitive tool. When sign
 | Skill | When it activates | What it does |
 |-------|------------------|--------------|
 | `/geb:think` | Ambiguous goals, trade-off analysis | Structured exploration: problem definition → approach comparison → clear direction |
-| `/geb:plan` | Multi-step implementation | Decompose into atomic steps with verify conditions, dependency graphs, execution strategy |
 | `/geb:debug` | Something broken, unexpected behavior | Systematic diagnosis: symptoms → reproduce → isolate → root cause → fix → verify |
 | `/geb:review` | Work completed, before shipping | Multi-dimensional quality audit: correctness, consistency, ripple, security, completeness |
 | `/geb:align` | Task completion, drift suspected | Goal verification: completeness, accuracy, drift, ripple impact |
 | `/geb:groove` | Recurring patterns noticed | Discipline pipeline: create proposals → user reviews → graduate to automated habits |
 
-These chain naturally for deep tasks: think → plan → (execute) → review → align. Debug when something breaks. Groove when patterns emerge.
+Planning and task decomposition use Claude's built-in capabilities. For multi-step tasks needing orchestration (parallel agents, wave execution), GEB provides a reference guide loaded on demand.
 
 ### Disciplines
 
@@ -110,13 +109,12 @@ cd geb
 bash install.sh
 ```
 
-This installs 7 skills and a session-start hook:
+This installs 6 skills and a session-start hook:
 
 | Skill | What it does |
 |-------|-------------|
 | `prelude` | Auto-loaded every session. Depth guard, disciplines, organic state. |
 | `/geb:think` | Structured exploration for complex tasks. |
-| `/geb:plan` | Decompose approach into executable steps with orchestration. |
 | `/geb:debug` | Systematic diagnosis for anything broken or unexpected. |
 | `/geb:review` | Multi-dimensional quality audit before shipping. |
 | `/geb:align` | Verify results against original goals, check ripple impact. |

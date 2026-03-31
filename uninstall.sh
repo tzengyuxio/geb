@@ -3,7 +3,7 @@ set -euo pipefail
 
 SKILLS_DIR="$HOME/.claude/skills"
 SETTINGS_FILE="$HOME/.claude/settings.json"
-SKILLS=(prelude geb:think geb:plan geb:align geb:debug geb:review geb:groove)
+SKILLS=(prelude geb:think geb:align geb:debug geb:review geb:groove)
 
 echo "Uninstalling GEB..."
 

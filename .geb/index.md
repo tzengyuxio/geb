@@ -15,9 +15,8 @@ Build an adaptive thinking framework for Claude Code that intervenes when depth 
 ### Current Skill Set
 | Layer | Skill | Role |
 |-------|-------|------|
-| Sentinel | prelude | Depth guard, disciplines, organic state |
+| Sentinel | prelude | Depth guard, disciplines, organic state, orchestration reference |
 | Thinking | geb:think | Structured exploration |
-| Planning | geb:plan | Decomposition + orchestration |
 | Diagnosis | geb:debug | Symptoms → root cause → fix → verify |
 | Quality | geb:review | Multi-dimensional audit |
 | Alignment | geb:align | Goal verification + ripple impact |
@@ -25,6 +24,7 @@ Build an adaptive thinking framework for Claude Code that intervenes when depth 
 
 ## Notes
 
+- geb:plan removed — planning uses Claude's built-in capabilities; orchestration moved to prelude references
 - See [philosophy.md](philosophy.md) for System 1/2 cognitive architecture and discipline evolution theory
-- 28 test scenarios across 7 skills (prelude 16, think 4, plan 4, debug 2, review 2, evolution 3, upgrade 2, conflict 1)
-- Prelude SKILL.md slimmed via progressive disclosure (organic-state + telemetry in references/)
+- 24 test scenarios across 6 skills
+- Prelude SKILL.md slimmed via progressive disclosure (organic-state, telemetry, orchestration in references/)

@@ -8,7 +8,7 @@ description: GEB framework core — depth guard that intervenes when structured 
 GEB is a depth guard. It watches for signals that a task needs more thinking than surface-level execution, and intervenes when it detects them. For everything else, it stays out of the way.
 
 **When the user explicitly invokes `/prelude`**, briefly orient them:
-"GEB active. I'll intervene when a task needs deeper thinking. You also have `/geb:think`, `/geb:plan`, and `/geb:align` available."
+"GEB active. I'll intervene when a task needs deeper thinking. You also have `/geb:think`, `/geb:debug`, `/geb:review`, `/geb:align`, and `/geb:groove` available."
 
 When loaded via auto-hook (session start), say nothing — just apply the guidelines silently.
 
@@ -107,13 +107,12 @@ Miss events are high-value signals for improving GEB's depth detection.
 | Skill | Purpose |
 |-------|---------|
 | `/geb:think` | Structured exploration — clarify the problem, compare approaches, arrive at a direction |
-| `/geb:plan` | Decompose into executable steps with orchestration strategy |
-| `/geb:align` | Verify results against the original goal, check ripple impact |
 | `/geb:debug` | Systematic diagnosis — symptoms → reproduce → isolate → root cause → fix |
 | `/geb:review` | Multi-dimensional quality audit — correctness, consistency, ripple, security, completeness |
+| `/geb:align` | Verify results against the original goal, check ripple impact |
 | `/geb:groove` | Review and apply discipline proposals generated from usage patterns |
 
-For deep tasks, skills chain naturally: think → plan → (execute) → review → align. Debug when something breaks.
+For multi-step tasks needing orchestration (parallel agents, wave execution), see [references/orchestration.md](references/orchestration.md).
 
 ---
 

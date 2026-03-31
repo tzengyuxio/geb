@@ -52,7 +52,7 @@ Be direct:
 
 Based on findings:
 - **Aligned** → done, or proceed to next phase
-- **Gap found** → suggest addressing it, or re-enter `/geb:plan` for remaining work
+- **Gap found** → suggest addressing it, or plan remaining work
 - **Drift detected** → confirm new direction with user before continuing
 - **Needs rethinking** → suggest `/geb:think` to reassess approach
 

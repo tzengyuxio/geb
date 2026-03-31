@@ -32,11 +32,12 @@ This is analogous to the brain's salience network: an automatic mechanism whose 
 
 Design implication: **the sentinel must be extremely lightweight.** The heavier it is, the more it disrupts System 1's natural operation. Signal detection + minimal guardrails, nothing more.
 
-### geb:think / geb:plan / geb:align = System 2 Tools
+### geb:think / geb:debug / geb:review / geb:align = System 2 Tools
 
 These are the actual System 2 cognitive tools:
 - **geb:think** — structured exploration, problem reframing, approach comparison
-- **geb:plan** — decomposition, dependency analysis, execution strategy
+- **geb:debug** — systematic diagnosis, root cause analysis
+- **geb:review** — multi-dimensional quality audit
 - **geb:align** — goal verification, drift detection
 
 They are activated on demand (by prelude's signal detection or by explicit user invocation), not always-on.
