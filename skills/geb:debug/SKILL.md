@@ -15,17 +15,20 @@ Something isn't working. Find out why before trying to fix it.
 
 ### 1. Symptoms
 
+**Read the code first.** Before asking the user anything, read the relevant files to understand the current state. The answer is often in the code.
+
 State what's actually happening vs what's expected. Be specific:
 
 - Bad: "it's broken"
 - Good: "POST /api/orders returns 500, expected 201. Started after yesterday's deploy."
 
-If the user's report is vague, ask for the exact error message, steps to reproduce, or when it started.
+Only ask the user for more information if you've read the available code and still can't determine the issue. Never ask for information you can find yourself.
 
 ### 2. Reproduce
 
 Can you make it happen reliably?
 
+- **Read the test file and the code under test** — trace the execution path mentally or by reading
 - Run the failing test, hit the endpoint, execute the command
 - If not reproducible → gather more data (logs, env differences, timing), don't guess
 - Note: for non-code issues ("why did this campaign underperform?"), reproduction means gathering the data that shows the gap between expected and actual

@@ -4,9 +4,10 @@ You are evaluating whether a Claude Code skill ("GEB") improves Claude's behavio
 
 | Skill | Behavior |
 |-------|----------|
-| prelude | Depth guard — intervenes when structured thinking is needed (depth signals, ripple impact, disciplines), stays silent on simple tasks |
-| geb:think | Structured exploration — problem definition, research, approach comparison, clear direction |
-| geb:plan | Decomposition & execution design — atomic steps, dependency surfacing, execution strategy |
+| prelude | Depth guard — intervenes when structured thinking is needed (depth signals, ripple impact, disciplines), stays silent on simple tasks. Also handles discipline evolution: detects recurring patterns and creates proposals. |
+| geb:think | Structured exploration — problem definition, research, approach comparison, clear direction. Key principle: investigate while asking (show findings alongside questions, never ask-and-stop). |
+| geb:debug | Systematic diagnosis — symptoms → reproduce → isolate → root cause → fix. Iron rule: no fix without stated root cause. |
+| geb:review | Multi-dimensional quality audit — correctness, consistency, ripple impact, security, completeness. Leads with problems, ends with verdict (ready/needs fixes/needs rethinking). |
 
 ## Scenario
 
@@ -14,7 +15,7 @@ You are evaluating whether a Claude Code skill ("GEB") improves Claude's behavio
 - **Skill**: {{skill}}
 - **Skill behavior**: (see reference table above)
 - **Category**: {{category}}
-- **Expected behavior**: depth-signal = detect complexity and engage thinking; upgrade = discover hidden complexity mid-task; discipline = apply universal guardrails; conflict = balance competing signals
+- **Expected behavior**: depth-signal = detect complexity and engage thinking; upgrade = discover hidden complexity mid-task; discipline = apply universal guardrails; conflict = balance competing signals; diagnosis = systematic root-cause identification before fixing; quality = multi-dimensional review across correctness, security, completeness; evolution = pattern detection and discipline proposal creation
 - **Prompt**: "{{prompt}}"
 
 ## Pass Criteria

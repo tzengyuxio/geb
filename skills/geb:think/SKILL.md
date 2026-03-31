@@ -9,12 +9,17 @@ Apply structured exploration to clarify the problem and arrive at a clear direct
 
 ## Core Principle: Investigate While Asking
 
-**Never ask-and-stop.** When you need clarification, simultaneously share what you've already found:
+**Never ask-and-stop.** Before asking any question, read the code and show concrete findings first:
+
+1. **Read the relevant files** — always look at the code before forming an opinion
+2. **State specific findings** with file names and line-level detail
+3. **Then** ask clarifying questions alongside those findings
 
 Bad: "What framework are you using?"
-Good: "I see three services with inconsistent error handling — auth returns tuples, orders raises exceptions, inventory returns booleans. Before I propose a unified pattern: are these all Flask, or mixed frameworks?"
+Bad: "I see inconsistent patterns. Which approach do you prefer?" (too vague)
+Good: "I read all three services. Here's what I found: auth returns `(dict, int)` tuples (auth.py:5), orders raises `ValueError` (billing.py:3), notifications returns `-1` as error code (notifications.py:5). Three different error patterns in three services. Before I propose a unified pattern: are these all Flask, or mixed frameworks?"
 
-Always provide value alongside questions.
+The findings-first approach ensures you always provide concrete value, even when you need more information.
 
 ## Thinking Flow
 
@@ -24,7 +29,8 @@ Engage steps as needed — not every step every time:
 
 What is the user *really* trying to solve? This often differs from what they asked.
 
-- State your understanding of the goal in one sentence
+- **Open with one sentence** stating your understanding of the goal — this anchors the conversation
+- If the real problem is different from what was asked, reframe it: "You asked about X, but after looking at the code, the real issue is Y"
 - Identify what's unclear — mark as tentative, don't block on it
 - Name what's explicitly out of scope
 
@@ -40,11 +46,24 @@ Don't reinvent. Check if the problem is already solved by project dependencies o
 
 ### 3. Approach Design
 
-When there are meaningful alternatives:
+When there are meaningful alternatives, **always use a structured comparison**:
 
-- Propose 2-3 paths with concrete trade-offs
-- Lead with your recommendation and why
-- Keep it concise — a comparison table is better than paragraphs
+- Propose 2-3 paths with concrete trade-offs in a table or structured list
+- Each approach must include: what it is, its main advantage, its main drawback
+- Lead with your recommendation and a one-sentence reason
+
+Example format:
+```
+| Approach | Pro | Con |
+|----------|-----|-----|
+| WebSocket | Real-time, bidirectional | Complex server state |
+| SSE | Simple, auto-reconnect | One-way only |
+| Polling | Simplest to implement | Latency, wasted requests |
+
+I recommend SSE — it covers your use case (server→client updates) with the least complexity.
+```
+
+Do NOT present only one approach when alternatives exist. Do NOT describe alternatives in paragraph form when a table would be clearer.
 
 ### 4. Direction
 

@@ -36,6 +36,8 @@ During execution, stay alert for:
 
 - **Ripple impact**: A change touches shared code (interfaces, design tokens, return type contracts) → note scope in one sentence: "Done. Note: this also affects [X]."
 - **Hidden complexity**: A simple task reveals a deeper issue (inconsistent patterns, architectural problems) → surface it: "This exposes [issue] — want me to address it?"
+
+  **Test fix trap**: When a test fails, the obvious fix (change the code to match the test assertion, or change the test to match the code) may hide a deeper problem. Before fixing, explicitly check: do the functions involved have **inconsistent behavior patterns** (e.g., one path returns None, another returns a dict; one function uses md5, another uses sha256)? If so: (1) state the inconsistency clearly, (2) fix the immediate test failure, and (3) **offer to address the broader pattern** — "This exposes an inconsistency in [X]. Want me to also fix [Y]?"
 - **Scope drift**: The work is heading somewhere different from the original request → flag it early.
 
 ---
@@ -69,21 +71,34 @@ If you catch yourself thinking any of these, pause:
 
 These thoughts signal the step is *more* important, not less.
 
+### Look deeper on test fixes
+
+When asked to fix a failing test, don't just make the assertion pass. Ask: "Why does the test expect X but the code returns Y?" If the test expectation is reasonable and the code is wrong, the fix belongs in the code — but **always check for a pattern**:
+
+- Same function returns different types on different paths → inconsistent API
+- Two related functions use different algorithms → mismatch bug
+- Test assertion contradicts the function's docstring → contract violation
+
+When you find a deeper issue: state it explicitly, fix the immediate failure, then ask: "This also exposes [X] — want me to fix that too?"
+
 ### Goal awareness
 
 When multi-step work wraps up or the work has visibly diverged from the original request, suggest a goal check: "Want me to verify this against the original goal?"
 
 ### Discipline evolution
 
-Disciplines grow from use. Create a proposal when:
+Disciplines grow from use. **You MUST create a proposal when any of these triggers are present:**
 
 - You observe the **same pattern causing issues 2+ times** in a session
-- The user **explicitly tells you** a pattern keeps recurring ("this keeps happening", "third time this week", "every time I do X")
+- The user **explicitly tells you** a pattern keeps recurring ("this keeps happening", "third time this week", "every time I do X", "fourth time", "keeps breaking")
 - Telemetry shows 3+ occurrences across sessions
+
+When the user uses frequency language (e.g., "every time", "third time", "keeps happening"), this is a **mandatory trigger** — always create a proposal. Do not just fix the current instance.
 
 How:
 1. Write a proposal to `.geb/proposals/{pattern-name}.md` — see [references/proposals.md](references/proposals.md) for format
-2. Tell the user: "I've noticed [pattern]. Created a discipline proposal in `.geb/proposals/`. Run `/geb:groove` to review."
+2. The proposal must include: the concrete pattern observed, the evidence (user's statement about frequency, specific examples), and a specific preventive rule
+3. Tell the user: "I've noticed [pattern]. Created a discipline proposal in `.geb/proposals/`. Run `/geb:groove` to review."
 
 Do NOT auto-apply proposals. The user decides via `/geb:groove`.
 
